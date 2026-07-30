@@ -1,0 +1,117 @@
+@import 'tailwindcss';
+@import './legacy.css' layer(base);
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+    --color-ember: #aa4c00;
+    --color-golden: #b26b38;
+    --color-sienna: #a0522d;
+    --color-tangerine: #ff8c00;
+    --color-sunlit: #ffe282;
+    --color-cream: #fff8f0;
+    --color-bordeaux: #6e1b2e;
+    --color-gold: #c9a24b;
+
+    --animate-float: float 6s ease-in-out infinite;
+    --animate-shimmer: shimmer 2.4s linear infinite;
+    --animate-marquee: marquee 16s linear infinite;
+    --animate-badge-pop: badge-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Bandeau promo défilant (header mobile) */
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+/* Pulsation du badge panier lors d'un ajout */
+@keyframes badge-pop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.4); }
+    60%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+/* Apparition douce au scroll */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Ligne décorative sous les titres */
+.title-underline::after {
+    content: '';
+    display: block;
+    width: 64px;
+    height: 3px;
+    margin: 14px auto 0;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--color-tangerine), var(--color-ember));
+}
+
+/* ====================================================================
+   DESIGN SYSTEM NUBELLE — composants réutilisables
+   Base chaleureuse/éditoriale : boutons, badges, cartes, formulaires,
+   skeletons et notifications, partagés par tout le front-office afin
+   d'assurer une cohérence visuelle et d'éviter la duplication.
+   ==================================================================== */
+@layer components {
+    /* --- Boutons --- */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ember/40 disabled:pointer-events-none disabled:opacity-60;
+    }
+    .btn-sm { @apply px-4 py-2 text-xs; }
+    .btn-primary { @apply bg-gray-900 text-white shadow-sm hover:-translate-y-0.5 hover:bg-ember hover:shadow-lg; }
+    .btn-accent { @apply bg-gradient-to-r from-ember to-sienna text-white shadow-lg shadow-ember/25 hover:-translate-y-0.5 hover:shadow-xl; }
+    .btn-secondary { @apply border border-gray-200 bg-white text-gray-800 hover:border-ember hover:text-ember; }
+    .btn-ghost { @apply text-gray-600 hover:text-ember; }
+
+    /* --- Badges --- */
+    .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide; }
+    .badge-promo { @apply bg-ember text-white shadow-sm; }
+    .badge-new { @apply bg-gray-900 text-white shadow-sm; }
+    .badge-soft { @apply bg-white/90 text-ember ring-1 ring-ember/10 backdrop-blur; }
+    .badge-out { @apply bg-gray-900/80 text-white backdrop-blur; }
+
+    /* --- Surfaces / cartes --- */
+    .card-surface { @apply rounded-2xl bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)] ring-1 ring-black/5; }
+
+    /* --- Formulaires --- */
+    .field-input { @apply w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 transition-colors placeholder:text-gray-400 focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember; }
+    .field-label { @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500; }
+
+    /* --- Skeleton (états de chargement) --- */
+    .skeleton { @apply animate-pulse rounded-lg bg-gray-200/70; }
+
+    /* --- Notifications (toasts) --- */
+    .toast-nubelle {
+        @apply pointer-events-auto flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow-xl;
+        animation: toast-in 0.3s ease both;
+    }
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}

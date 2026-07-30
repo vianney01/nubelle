@@ -1,0 +1,392 @@
+/* ==========================================================================
+   NUBELLE COSMETICS — Styles hérités des maquettes (bandeau, popups, footer…)
+   Importé dans le layer "base" de Tailwind pour que les utilitaires Tailwind
+   restent toujours prioritaires sur ces règles.
+   ========================================================================== */
+
+:root {
+  --ember:        #AA4C00;
+  --golden-brown: #B26B38;
+  --burnt-sienna: #A0522D;
+  --tangerine:    #FF8C00;
+  --sunlit-yellow:#ffe282;
+  --cream:        #FFF8F0;
+  --ink:          #000;
+  --muted:        #555;
+  --line:         #ddd;
+}
+
+a { color: inherit; }
+
+/* ============================= BANDEAU HAUT ============================== */
+.bandeau-haut {
+  background-color: var(--tangerine);
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+}
+
+.contenu-bandeau {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  color: #fff;
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.bouton-menu {
+  font-size: 24px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.icones-droits { display: flex; gap: 15px; align-items: center; }
+
+.compte, .panier-icone { position: relative; cursor: pointer; font-size: 20px; }
+.compte img, .panier-icone img { width: 24px; height: 24px; }
+
+.carousel-textes {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  height: 22px;
+  overflow: hidden;
+}
+.texte-carousel {
+  position: absolute;
+  left: 0; right: 0;
+  opacity: 0;
+  transition: opacity 1s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+}
+.texte-carousel.active { opacity: 1; }
+
+/* Dropdown compte */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 34px; right: 0;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 100;
+  min-width: 160px;
+  padding: 8px;
+}
+.btn-auth {
+  display: block;
+  width: 100%;
+  background-color: var(--ember);
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 6px 0;
+  transition: background 0.3s ease;
+}
+.btn-auth:hover { background-color: var(--burnt-sienna); }
+
+/* ===================== MENU LATERAL — DESKTOP (drawer) ================= */
+/* Le contenu est entièrement stylé en Tailwind dans le layout ; on ne garde
+   ici que le mécanisme de glissement du panneau. */
+.menu-lateral {
+  position: fixed;
+  top: 0; left: 0;
+  width: 380px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #fff;
+  box-shadow: 16px 0 48px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  z-index: 1050;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.menu-lateral.actif { transform: translateX(0); }
+
+/* =============================== HEADER ================================= */
+.entete {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: relative;
+}
+.entete .logo img { height: 44px; max-width: 200px; object-fit: contain; }
+.entete .panier {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.entete .panier img { width: 28px; height: 28px; }
+.entete .panier .badge-panier {
+  position: absolute;
+  top: -6px; right: -6px;
+  background-color: var(--tangerine);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+/* ======================== PANIER (drawer latéral) ===================== */
+.panier-mobile {
+  position: fixed; top: 0; right: 0;
+  width: 380px; max-width: 88vw; height: 100vh;
+  background-color: #fff; box-shadow: -16px 0 48px rgba(0,0,0,0.14);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1050; overflow: hidden;
+}
+.panier-mobile.actif { transform: translateX(0); }
+
+.drawer-panier-backdrop {
+  position: fixed; inset: 0;
+  background-color: rgba(17, 17, 17, 0.45);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1040;
+}
+.drawer-panier-backdrop.actif { opacity: 1; visibility: visible; }
+
+/* =============================== FOOTER =============================== */
+.footer { background-color: #fff0f5; padding: 60px 20px; color: #333; }
+.newsletter { max-width: 800px; margin: 0 auto 40px; text-align: center; }
+.newsletter h3 { font-size: 24px; font-weight: 600; margin-bottom: 10px; }
+.newsletter p { font-size: 14px; color: #777; margin-bottom: 20px; }
+.newsletter form { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.newsletter input { padding: 12px; width: 280px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+.newsletter button { padding: 12px 24px; border: none; background-color: #000; color: #fff; border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; }
+.reseaux { text-align: center; margin-bottom: 30px; }
+.reseaux img { width: 24px; margin: 0 12px; }
+.footer-liens { max-width: 900px; margin: 40px auto 0; text-align: center; padding: 40px 20px 20px; color: #444; }
+.footer-liens .liens, .footer-liens .legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin-bottom: 20px; }
+.footer-liens .liens a { text-decoration: none; color: #555; font-size: 14px; transition: color 0.3s ease; }
+.footer-liens .legal a { text-decoration: none; font-size: 12px; color: #888; }
+.footer-liens a:hover { color: var(--ember); }
+.footer-liens .copyright { font-size: 12px; color: #aaa; margin-top: 10px; }
+
+/* ====================== POPUP CONNEXION / INSCRIPTION ================== */
+.overlay {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: none; justify-content: center; align-items: center;
+  z-index: 2000; padding: 20px;
+}
+.overlay.actif { display: flex; }
+.popup {
+  background: #fff; padding: 30px; border-radius: 16px;
+  width: 100%; max-width: 420px; position: relative;
+  animation: fadeIn 0.3s ease; box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95);} to { opacity: 1; transform: scale(1);} }
+.popup h2 { color: var(--ember); margin-bottom: 20px; font-size: 20px; text-align: center; }
+.popup input { width: 100%; padding: 12px; margin-bottom: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #fafafa; }
+.popup button[type=submit], .popup .btn-submit { width: 100%; background: var(--ember); color: #fff; padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.3s ease; }
+.popup button[type=submit]:hover, .popup .btn-submit:hover { background: var(--burnt-sienna); }
+.popup .close-btn { position: absolute; top: 12px; right: 18px; font-size: 22px; font-weight: bold; color: #aaa; cursor: pointer; }
+.popup .close-btn:hover { color: #000; }
+.popup p { text-align: center; margin-top: 16px; font-size: 13px; }
+.popup p a { color: var(--ember); text-decoration: none; font-weight: 600; }
+.popup .erreur { color: #c0392b; font-size: 13px; margin-bottom: 10px; text-align: left; }
+
+/* ============================ AVIS (popup image) ======================= */
+.popup-avis {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex; justify-content: center; align-items: center;
+  visibility: hidden; opacity: 0; transition: 0.4s ease; z-index: 9999;
+}
+.popup-avis.active { visibility: visible; opacity: 1; }
+.popup-avis-contenu { display: flex; background: #fff; border-radius: 10px; overflow: hidden; max-width: 700px; width: 90%; position: relative; flex-wrap: wrap; }
+.popup-avis-contenu img { width: 100%; max-width: 300px; object-fit: cover; }
+.texte-avis-client { padding: 20px; font-size: 16px; color: #333; flex: 1; display: flex; align-items: center; }
+.fermer-popup-avis { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #fff; background-color: rgba(0,0,0,0.5); border-radius: 50%; padding: 0 10px; }
+
+@media (max-width: 600px) {
+  .popup-avis-contenu { flex-direction: column; align-items: center; text-align: center; }
+  .popup-avis-contenu img { width: 100%; max-width: 100%; }
+}
+
+/* ============================= POPUP PROMO ============================ */
+.popup-promo {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999; opacity: 0; visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease; backdrop-filter: blur(3px);
+}
+.popup-promo.active { opacity: 1; visibility: visible; }
+.popup-contenu { position: relative; width: 90%; max-width: 420px; background: #fff; border-radius: 18px; overflow: hidden; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.3); animation: fadeIn 0.6s ease; }
+.popup-contenu img { width: 100%; height: auto; display: block; }
+.texte-promo { padding: 25px 20px; background-color: #fffef9; }
+.texte-promo .promo-titre { font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ember); margin-bottom: 5px; }
+.texte-promo h2 { font-size: 32px; font-weight: 800; color: #000; margin: 15px 0 10px; }
+.texte-promo p { font-size: 15px; color: var(--muted); margin-bottom: 20px; }
+.bouton-promo { display: inline-block; padding: 12px 25px; background-color: var(--ember); color: #fff; font-weight: 600; border-radius: 8px; text-decoration: none; transition: background-color 0.3s ease; font-size: 14px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+.bouton-promo:hover { background-color: var(--burnt-sienna); }
+
+/* Pop-up marketing — badge + bloc code promo de bienvenue */
+.texte-promo .promo-badge { display: inline-block; background-color: var(--ember); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; margin-bottom: 12px; }
+.promo-code-bloc { margin: 6px 0 20px; padding: 16px; border-radius: 14px; background: #fff8f0; border: 1px dashed var(--ember); }
+.promo-code-bloc .promo-reduction { font-size: 18px; font-weight: 800; color: var(--ember); margin: 0 0 10px; }
+.promo-code-bloc .promo-code-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+.promo-code-ligne { display: flex; align-items: stretch; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.promo-code-bloc .promo-code { font-family: 'Courier New', Courier, monospace; font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #111; background: #fff; border: 2px solid var(--ember); border-radius: 10px; padding: 8px 16px; }
+.promo-copier { border: none; cursor: pointer; background-color: var(--ember); color: #fff; font-weight: 700; font-size: 13px; border-radius: 10px; padding: 0 18px; transition: background-color 0.3s ease; }
+.promo-copier:hover { background-color: var(--burnt-sienna); }
+.promo-copier.copie { background-color: #1a7f37; }
+.promo-code-bloc .promo-conditions { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+.fermer-popup { position: absolute; top: 12px; right: 14px; font-size: 26px; font-weight: bold; color: #fff; background-color: rgba(0,0,0,0.5); border-radius: 50%; width: 32px; height: 32px; line-height: 32px; text-align: center; cursor: pointer; z-index: 10; }
+
+/* ============================= RESPONSIVE ============================= */
+@media (max-width: 600px) {
+  .icones-droits { gap: 10px; }
+}
+
+/* ======================= RIDEAU DU DRAWER MOBILE ========================
+   Le drawer desktop (#menuLateral) n'est jamais concerné : il reste dans
+   son wrapper "hidden sm:block" et garde son CSS/rendu d'origine intact.
+   Le rideau n'est visible qu'en dessous de 640px (breakpoint Tailwind sm).
+   ========================================================================= */
+.drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+@media (max-width: 639.98px) {
+  .drawer-backdrop.actif {
+    display: block;
+    opacity: 1;
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* Sur desktop, le menu latéral premium mérite aussi un voile cliquable. */
+@media (min-width: 640px) {
+  .drawer-backdrop.actif {
+    display: block;
+    opacity: 1;
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* ===================== DRAWER MOBILE PREMIUM (Nubelle) ==================
+   Nouveau menu latéral dédié au mobile — n'existe que dans le wrapper
+   Tailwind "sm:hidden" du layout, donc totalement invisible dès 640px.
+   Palette dédiée : blanc / beige très clair / bordeaux / doré (accent).
+   ========================================================================= */
+.drawer-mobile {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 85%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #fffdfb 0%, #fdf7ef 100%);
+  z-index: 1000;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  opacity: 0;
+  box-shadow: 18px 0 45px rgba(0, 0, 0, 0.14);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+}
+.drawer-mobile.actif { transform: translateX(0); opacity: 1; }
+.drawer-mobile nav { flex: 1; }
+
+.drawer-eyebrow {
+  letter-spacing: 0.14em;
+  color: var(--color-gold);
+}
+
+.drawer-list { display: flex; flex-direction: column; gap: 2px; }
+
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: #3a2530;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.15s ease;
+}
+.drawer-link:hover { background-color: rgba(110, 27, 46, 0.06); }
+.drawer-link:active { background-color: rgba(110, 27, 46, 0.1); transform: scale(0.98); }
+
+.drawer-icon {
+  display: flex;
+  height: 34px;
+  width: 34px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(201, 162, 75, 0.14);
+  color: var(--color-bordeaux);
+}
+.drawer-icon svg { height: 18px; width: 18px; }
+
+.drawer-social {
+  display: flex;
+  height: 38px;
+  width: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(110, 27, 46, 0.18);
+  color: var(--color-bordeaux);
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+.drawer-social svg { height: 17px; width: 17px; }
+.drawer-social:hover { background-color: var(--color-bordeaux); color: #fff; transform: translateY(-2px); }
+
+/* Apparition progressive des liens à l'ouverture */
+.drawer-row {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.drawer-mobile.actif .drawer-row {
+  animation: drawer-item-in 0.45s ease forwards;
+}
+.drawer-list > li:nth-child(1) { animation-delay: 0.06s; }
+.drawer-list > li:nth-child(2) { animation-delay: 0.11s; }
+.drawer-list > li:nth-child(3) { animation-delay: 0.16s; }
+.drawer-list > li:nth-child(4) { animation-delay: 0.21s; }
+.drawer-list > li:nth-child(5) { animation-delay: 0.26s; }
+
+@keyframes drawer-item-in {
+  to { opacity: 1; transform: translateY(0); }
+}

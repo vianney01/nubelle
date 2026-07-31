@@ -44,13 +44,24 @@ Route::patch('/panier/{produit:slug}', [PanierController::class, 'modifier'])->n
 Route::delete('/panier/{produit:slug}', [PanierController::class, 'supprimer'])->name('panier.supprimer');
 Route::delete('/panier', [PanierController::class, 'vider'])->name('panier.vider');
 
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout', [CheckoutController::class, 'valider'])->name('checkout.valider');
-Route::get('/checkout/confirmation/{commande:numero}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
+// Le tunnel de commande exige désormais un compte client (plus de mode invité).
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'valider'])->name('checkout.valider');
+    Route::get('/checkout/confirmation/{commande:numero}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
+});
 
-// Compte
+// Authentification client
 Route::get('/connexion', [AuthController::class, 'login'])->name('connexion');
-Route::get('/compte', [CompteController::class, 'index'])->name('compte.index');
+Route::post('/connexion', [AuthController::class, 'authenticate'])->name('connexion.authenticate');
+Route::post('/inscription', [AuthController::class, 'register'])->name('inscription');
+Route::post('/deconnexion', [AuthController::class, 'logout'])->name('deconnexion');
+
+// Espace client (compte, commandes, favoris, adresses) — protégé
+Route::middleware('auth')->group(function () {
+    Route::get('/compte', [CompteController::class, 'index'])->name('compte.index');
+    Route::patch('/compte/profil', [CompteController::class, 'updateProfil'])->name('compte.profil.update');
+});
 
 // Facture imprimable (back-office — administrateurs authentifiés)
 Route::get('/admin/commandes/{commande}/facture', [FactureController::class, 'show'])

@@ -46,6 +46,8 @@ class ClientResource extends Resource
                         TextInput::make('nom')->required()->maxLength(100),
                         TextInput::make('email')->email()->required()->unique(ignoreRecord: true),
                         TextInput::make('telephone')->tel()->maxLength(30),
+                        TextInput::make('whatsapp')->label('WhatsApp')->tel()->maxLength(30)
+                            ->helperText('Ex. : 0556400246 ou +2250556400246'),
                     ]),
                 Section::make('Adresse')
                     ->columns(2)
@@ -68,6 +70,7 @@ class ClientResource extends Resource
                     ->searchable(['prenom', 'nom']),
                 TextColumn::make('email')->searchable(),
                 TextColumn::make('telephone'),
+                TextColumn::make('whatsapp')->label('WhatsApp')->searchable()->copyable()->placeholder('—'),
                 TextColumn::make('ville'),
                 TextColumn::make('commandes_count')->counts('commandes')->label('Commandes')->badge(),
                 TextColumn::make('created_at')->label('Client depuis')->date('d/m/Y')->sortable(),

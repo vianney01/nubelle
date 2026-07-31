@@ -32,8 +32,13 @@
           <div class="compte" onclick="toggleDropdown(event)">
             <img src="{{ asset('images/utilisateur.png') }}" alt="Compte">
             <div class="dropdown-menu" id="dropdownCompte">
-              <button class="btn-auth" onclick="ouvrirPopup('connexion')">Se connecter</button>
-              <button class="btn-auth" onclick="ouvrirPopup('inscription')">S'inscrire</button>
+              @guest
+                <button class="btn-auth" onclick="ouvrirPopup('connexion')">Se connecter</button>
+                <button class="btn-auth" onclick="ouvrirPopup('inscription')">S'inscrire</button>
+              @else
+                <a href="{{ url('/compte') }}" class="btn-auth" style="text-decoration:none;display:block;text-align:center;">Mon compte</a>
+                <form method="POST" action="{{ route('deconnexion') }}">@csrf<button type="submit" class="btn-auth" style="width:100%;">Se déconnecter</button></form>
+              @endguest
             </div>
           </div>
         </div>
@@ -109,6 +114,7 @@
               <button class="btn-auth" onclick="ouvrirPopup('inscription')">S'inscrire</button>
             @else
               <a href="{{ url('/compte') }}" class="btn-auth" style="text-decoration:none;display:block;text-align:center;">Mon compte</a>
+              <form method="POST" action="{{ route('deconnexion') }}">@csrf<button type="submit" class="btn-auth" style="width:100%;">Se déconnecter</button></form>
             @endguest
           </div>
         </div>

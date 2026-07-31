@@ -17,7 +17,7 @@ class PanierController extends Controller
         $promo = $promotions->evaluer(
             $lignes,
             Panier::codePromo(),
-            $promotions->contexteDepuisEmail(null, session('client_id')),
+            $promotions->contexteDepuisEmail(auth()->user()?->email),
         );
 
         // Un code devenu invalide (panier modifié depuis) est retiré silencieusement.
@@ -96,7 +96,7 @@ class PanierController extends Controller
         $resultat = $promotions->evaluer(
             $lignes,
             $code,
-            $promotions->contexteDepuisEmail(null, session('client_id')),
+            $promotions->contexteDepuisEmail(auth()->user()?->email),
         );
 
         if ($resultat['erreur_code']) {
@@ -136,7 +136,7 @@ class PanierController extends Controller
         $promo = $promotions->evaluer(
             Panier::lignes(),
             Panier::codePromo(),
-            $promotions->contexteDepuisEmail(null, session('client_id')),
+            $promotions->contexteDepuisEmail(auth()->user()?->email),
         );
 
         if ($promo['erreur_code'] && Panier::codePromo()) {

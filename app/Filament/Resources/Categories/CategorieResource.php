@@ -65,7 +65,9 @@ class CategorieResource extends Resource
     {
         return $table
             ->columns([
-                ImageColumn::make('image')->circular(),
+                ImageColumn::make('image')
+                    ->circular()
+                    ->getStateUsing(fn (\App\Models\Categorie $record) => $record->image_url),
                 TextColumn::make('nom')->searchable()->sortable(),
                 TextColumn::make('slug')->toggleable(),
                 TextColumn::make('produits_count')->counts('produits')->label('Produits')->badge(),

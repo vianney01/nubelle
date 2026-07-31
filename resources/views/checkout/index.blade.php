@@ -26,34 +26,33 @@
           </div>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <input type="text" name="prenom" value="{{ old('prenom') }}" required placeholder="Prénom"
+              <input type="text" name="prenom" value="{{ old('prenom', $client->prenom ?? '') }}" required placeholder="Prénom"
                      class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
               @error('prenom') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>
             <div>
-              <input type="text" name="nom" value="{{ old('nom') }}" required placeholder="Nom"
+              <input type="text" name="nom" value="{{ old('nom', $client->nom ?? '') }}" required placeholder="Nom"
                      class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
               @error('nom') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>
             <div class="sm:col-span-2">
-              <input type="email" name="email" value="{{ old('email') }}" required placeholder="Adresse e-mail"
-                     class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-              @error('email') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+              <input type="email" value="{{ auth()->user()->email }}" readonly title="Adresse de votre compte"
+                     class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 focus:outline-none">
             </div>
             <div class="sm:col-span-2">
-              <input type="text" name="adresse" value="{{ old('adresse') }}" required placeholder="Adresse"
+              <input type="text" name="adresse" value="{{ old('adresse', $client->adresse ?? '') }}" required placeholder="Adresse"
                      class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
               @error('adresse') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>
             <div>
-              <input type="text" name="ville" value="{{ old('ville') }}" required placeholder="Ville"
+              <input type="text" name="ville" value="{{ old('ville', $client->ville ?? '') }}" required placeholder="Ville"
                      class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
               @error('ville') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>
-            <input type="text" name="code_postal" value="{{ old('code_postal') }}" placeholder="Code postal"
+            <input type="text" name="code_postal" value="{{ old('code_postal', $client->code_postal ?? '') }}" placeholder="Code postal"
                    class="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
             <div class="sm:col-span-2">
-              <input type="tel" name="telephone" value="{{ old('telephone') }}" required placeholder="Téléphone"
+              <input type="tel" name="telephone" value="{{ old('telephone', $client->telephone ?? '') }}" required placeholder="Téléphone"
                      class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
               @error('telephone') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>

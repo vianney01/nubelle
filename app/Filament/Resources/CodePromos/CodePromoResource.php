@@ -48,6 +48,8 @@ class CodePromoResource extends Resource
         return $schema
             ->components([
                 Section::make('Informations')
+                    ->icon(Heroicon::OutlinedTag)
+                    ->description('Nom, code et description de la promotion.')
                     ->columns(2)
                     ->components([
                         Toggle::make('automatique')
@@ -76,6 +78,8 @@ class CodePromoResource extends Resource
                     ]),
 
                 Section::make('Réduction')
+                    ->icon(Heroicon::OutlinedReceiptPercent)
+                    ->description('Type et montant de l\'avantage accordé.')
                     ->columns(3)
                     ->components([
                         Select::make('type_reduction')
@@ -99,6 +103,7 @@ class CodePromoResource extends Resource
                     ]),
 
                 Section::make('Validité & limites')
+                    ->icon(Heroicon::OutlinedCalendarDays)
                     ->columns(3)
                     ->components([
                         DatePicker::make('date_debut')->label('Date de début'),
@@ -122,6 +127,7 @@ class CodePromoResource extends Resource
                     ]),
 
                 Section::make('Priorité & cumul')
+                    ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
                     ->columns(2)
                     ->components([
                         TextInput::make('priorite')
@@ -135,6 +141,7 @@ class CodePromoResource extends Resource
                     ]),
 
                 Section::make('Produits éligibles')
+                    ->icon(Heroicon::OutlinedShoppingBag)
                     ->description('Sans sélection, la réduction s\'applique à tout le panier.')
                     ->columns(2)
                     ->collapsible()
@@ -142,6 +149,13 @@ class CodePromoResource extends Resource
                         Select::make('produits')
                             ->label('Produits spécifiques')
                             ->relationship('produits', 'nom')
+                            ->getOptionLabelFromRecordUsing(fn (\App\Models\Produit $record) =>
+                                '<div style="display:flex;align-items:center;gap:.55rem;width:100%;min-width:0;">'
+                                .'<img src="'.e($record->image).'" alt="" style="height:28px;width:28px;border-radius:.4rem;object-fit:cover;background:#f3f4f6;flex:none;">'
+                                .'<span style="flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;">'.e($record->nom).'</span>'
+                                .'<span style="flex:none;opacity:.6;font-size:.8rem;white-space:nowrap;">'.number_format((float) $record->prix, 0, ',', ' ').' FCFA</span>'
+                                .'</div>')
+                            ->allowHtml()
                             ->multiple()
                             ->preload()
                             ->searchable(),
@@ -154,6 +168,8 @@ class CodePromoResource extends Resource
                     ]),
 
                 Section::make('Clients éligibles')
+                    ->icon(Heroicon::OutlinedUserGroup)
+                    ->description('À qui la promotion est réservée.')
                     ->columns(1)
                     ->collapsible()
                     ->components([

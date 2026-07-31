@@ -8,6 +8,7 @@ use App\Models\Commande;
 use App\Models\ContenuAccueil;
 use App\Models\Produit;
 use App\Support\CatalogueDemo;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -18,7 +19,7 @@ class HomeController extends Controller
      * données. La FAQ reste sur CatalogueDemo en attendant un module dédié
      * (aucune table dédiée pour l'instant).
      */
-    public function index()
+    public function index(Request $request)
     {
         $categories = Categorie::query()
             ->withCount('produits')
@@ -42,11 +43,11 @@ class HomeController extends Controller
         // Pop-up marketing : visible selon l'audience ciblée et la validité du
         // code promo de bienvenue (récupéré depuis le module Promotions).
         $accueil = ContenuAccueil::instance()->load('codePromoPopup');
-        $clientId = session('client_id');
-        $aCommande = $clientId ? Commande::where('client_id', $clientId)->exists() : false;
+        $user = $request->user();
+        $aCommande = $user ? $user->commandes()->exists() : false;
 
         $promoPopup = $accueil->codePromoPopup;
-        $popupVisible = $accueil->popupVisiblePour($clientId, $aCommande);
+        $popupVisible = $accueil->popupVisiblePour($user?->id, $aCommande);
         if ($popupVisible && $promoPopup && ! $promoPopup->estValideMaintenant()) {
             $popupVisible = false; // offre expirée / épuisée -> ne plus afficher
         }

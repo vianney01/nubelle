@@ -21,7 +21,10 @@ class ProduitsTable
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                ImageColumn::make('image_principale')->label('Image')->circular(),
+                ImageColumn::make('image')
+                    ->label('Image')
+                    ->circular()
+                    ->getStateUsing(fn (\App\Models\Produit $record) => $record->image),
                 TextColumn::make('nom')->searchable()->sortable(),
                 TextColumn::make('categorie.nom')->label('Catégorie')->badge()->sortable(),
                 TextColumn::make('prix')

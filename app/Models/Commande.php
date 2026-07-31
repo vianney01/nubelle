@@ -33,6 +33,7 @@ class Commande extends Model
     protected $fillable = [
         'numero',
         'client_id',
+        'user_id',
         'code_promo_id',
         'statut',
         'statut_paiement',
@@ -58,6 +59,11 @@ class Commande extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function codePromo(): BelongsTo

@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Les visiteurs non connectés qui tentent d'accéder à une page protégée
+        // (checkout, compte…) sont renvoyés vers la page de connexion/inscription.
+        $middleware->redirectGuestsTo(fn () => route('connexion'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

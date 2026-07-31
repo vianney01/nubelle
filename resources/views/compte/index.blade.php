@@ -36,7 +36,7 @@
 
   <section class="max-w-6xl mx-auto px-5 py-8">
     <h1 class="font-serif text-3xl font-bold text-gray-900 sm:text-4xl">Mon compte</h1>
-    <p class="mt-2 text-gray-500">Bienvenue{{ $client ? ', '.$client->prenom : '' }} — gérez vos commandes, adresses et préférences.</p>
+    <p class="mt-2 text-gray-500">Bienvenue, {{ $user->name }} — gérez vos commandes, adresses et préférences.</p>
 
     <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
 
@@ -58,12 +58,15 @@
           </button>
         @endforeach
 
-        <a href="{{ url('/connexion') }}" class="mt-2 hidden items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 lg:flex">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-          </svg>
-          Se déconnecter
-        </a>
+        <form method="POST" action="{{ route('deconnexion') }}" class="mt-2 hidden lg:block">
+          @csrf
+          <button type="submit" class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 transition-colors hover:bg-red-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+            </svg>
+            Se déconnecter
+          </button>
+        </form>
       </nav>
 
       {{-- ============================ CONTENU ============================ --}}
@@ -175,17 +178,21 @@
         {{-- Profil --}}
         <div id="onglet-compte-profil" class="onglet-compte-panneau hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
           <h2 class="font-serif text-lg font-bold text-gray-900">Informations personnelles</h2>
-          @if ($client)
-            <form onsubmit="event.preventDefault(); alert('Profil mis à jour (simulation).');" class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <input type="text" value="{{ $client->prenom }}" placeholder="Prénom" class="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-              <input type="text" value="{{ $client->nom }}" placeholder="Nom" class="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-              <input type="email" value="{{ $client->email }}" placeholder="E-mail" class="sm:col-span-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-              <input type="tel" value="{{ $client->telephone }}" placeholder="Téléphone" class="sm:col-span-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-              <button type="submit" class="sm:col-span-2 mt-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ember sm:w-fit">Enregistrer</button>
-            </form>
-          @else
-            <p class="mt-5 text-sm text-gray-500">Passez une commande pour créer votre fiche client et retrouver vos informations ici.</p>
-          @endif
+          <form method="POST" action="{{ route('compte.profil.update') }}" class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            @csrf
+            @method('PATCH')
+            <div class="sm:col-span-2">
+              <input type="text" name="name" value="{{ old('name', $user->name) }}" required placeholder="Nom complet" class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+              @error('name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+            <input type="email" value="{{ $user->email }}" readonly placeholder="E-mail" class="sm:col-span-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 focus:outline-none">
+            <div class="sm:col-span-2">
+              <input type="tel" name="whatsapp" value="{{ old('whatsapp', $user->whatsapp) }}" required placeholder="Numéro WhatsApp" class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+              <p class="mt-1 text-xs text-gray-400">Exemple : 0556400246 ou +2250556400246</p>
+              @error('whatsapp') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+            <button type="submit" class="sm:col-span-2 mt-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ember sm:w-fit">Enregistrer</button>
+          </form>
         </div>
 
         {{-- Sécurité --}}
@@ -197,7 +204,10 @@
             <input type="password" placeholder="Confirmer le nouveau mot de passe" class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
             <button type="submit" class="rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ember">Mettre à jour</button>
           </form>
-          <a href="{{ url('/connexion') }}" class="mt-6 inline-block text-sm font-semibold text-red-500 hover:text-red-600 lg:hidden">Se déconnecter</a>
+          <form method="POST" action="{{ route('deconnexion') }}" class="mt-6 lg:hidden">
+            @csrf
+            <button type="submit" class="text-sm font-semibold text-red-500 hover:text-red-600">Se déconnecter</button>
+          </form>
         </div>
       </div>
     </div>

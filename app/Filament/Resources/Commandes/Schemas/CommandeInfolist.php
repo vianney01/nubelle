@@ -118,6 +118,17 @@ class CommandeInfolist
                             ->label('Téléphone')
                             ->placeholder('—')
                             ->url(fn (Commande $record) => $record->client?->telephone ? 'tel:'.$record->client->telephone : null),
+                        TextEntry::make('whatsapp')
+                            ->label('WhatsApp')
+                            ->badge()
+                            ->color('success')
+                            ->icon('heroicon-o-chat-bubble-left-right')
+                            ->placeholder('—')
+                            ->state(fn (Commande $record) => $record->client?->whatsapp ?? $record->user?->whatsapp)
+                            ->url(fn (Commande $record) => ($num = \App\Support\Whatsapp::pourLienWa($record->client?->whatsapp ?? $record->user?->whatsapp))
+                                ? 'https://wa.me/'.$num
+                                : null)
+                            ->openUrlInNewTab(),
                         TextEntry::make('client_nb_commandes')
                             ->label('Commandes passées')
                             ->badge()

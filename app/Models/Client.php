@@ -17,6 +17,7 @@ class Client extends Model
         'nom',
         'email',
         'telephone',
+        'whatsapp',
         'adresse',
         'ville',
         'code_postal',

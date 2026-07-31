@@ -55,7 +55,7 @@ class CommandeResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['client', 'codePromo']);
+        return parent::getEloquentQuery()->with(['client', 'user', 'codePromo']);
     }
 
     public static function getRelations(): array

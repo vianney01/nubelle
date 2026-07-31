@@ -41,7 +41,14 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Les fichiers du disque public sont servis par MediaController
+            // (route /media/{path}) plutôt que par le lien symbolique
+            // public/storage : ce dernier n'existe pas toujours et, sous
+            // Windows, la Junction NTFS est mal servie (403). URL volontairement
+            // RELATIVE : elle se résout sur l'hôte réel de la page (peu importe
+            // le port en dev ou le domaine en prod), donc les aperçus d'images
+            // fonctionnent aussi dans l'admin Filament, sans `storage:link`.
+            'url' => '/media',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

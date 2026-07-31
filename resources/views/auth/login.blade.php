@@ -17,6 +17,12 @@
       </div>
 
       <div class="p-6 sm:p-10">
+        @if (session()->has('url.intended'))
+          <div class="mb-6 rounded-2xl bg-cream/70 p-4 text-sm font-medium text-ember ring-1 ring-ember/10">
+            Un compte est nécessaire pour finaliser votre achat. Connectez-vous ou créez un compte pour continuer.
+          </div>
+        @endif
+
         {{-- Onglets --}}
         <div class="mb-8 flex gap-2 rounded-full bg-cream/60 p-1">
           <button type="button" onclick="basculerOngletAuth('connexion', this)" class="onglet-auth flex-1 rounded-full bg-gray-900 py-2.5 text-sm font-semibold text-white transition-colors">Connexion</button>
@@ -26,10 +32,17 @@
         {{-- Connexion --}}
         <div id="panneau-connexion" class="panneau-auth space-y-4">
           <h1 class="font-serif text-2xl font-bold text-gray-900">Bon retour parmi nous</h1>
-          <form onsubmit="event.preventDefault(); alert('Connexion simulée — authentification à venir.');" class="space-y-4">
-            <input type="email" required placeholder="Adresse e-mail" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-            <input type="password" required placeholder="Mot de passe" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-            <div class="text-right">
+          <form method="POST" action="{{ route('connexion.authenticate') }}" class="space-y-4">
+            @csrf
+            <div>
+              <input type="email" name="email" value="{{ old('email') }}" required placeholder="Adresse e-mail" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+              @error('email') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+            <input type="password" name="password" required placeholder="Mot de passe" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-xs text-gray-500">
+                <input type="checkbox" name="remember" class="h-4 w-4 rounded border-gray-300 text-ember focus:ring-ember"> Se souvenir de moi
+              </label>
               <button type="button" onclick="basculerOngletAuth('oubli')" class="text-xs font-semibold text-ember hover:text-sienna">Mot de passe oublié ?</button>
             </div>
             <button type="submit" class="w-full rounded-full bg-gray-900 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-ember">Se connecter</button>
@@ -39,11 +52,26 @@
         {{-- Inscription --}}
         <div id="panneau-inscription" class="panneau-auth hidden space-y-4">
           <h1 class="font-serif text-2xl font-bold text-gray-900">Créer un compte</h1>
-          <form onsubmit="event.preventDefault(); alert('Inscription simulée — authentification à venir.');" class="space-y-4">
-            <input type="text" required placeholder="Nom complet" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-            <input type="email" required placeholder="Adresse e-mail" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-            <input type="password" required placeholder="Mot de passe" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-            <input type="password" required placeholder="Confirmer le mot de passe" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+          <form method="POST" action="{{ route('inscription') }}" class="space-y-4">
+            @csrf
+            <div>
+              <input type="text" name="name" value="{{ old('name') }}" required placeholder="Nom complet" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+              @error('name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+            <div>
+              <input type="email" name="email" value="{{ old('email') }}" required placeholder="Adresse e-mail" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+              @error('email') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+            <div>
+              <input type="tel" name="whatsapp" value="{{ old('whatsapp') }}" required placeholder="Numéro WhatsApp" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+              <p class="mt-1 text-xs text-gray-400">Exemple : 0556400246 ou +2250556400246</p>
+              @error('whatsapp') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+            <div>
+              <input type="password" name="password" required placeholder="Mot de passe (8 caractères min.)" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+              @error('password') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+            <input type="password" name="password_confirmation" required placeholder="Confirmer le mot de passe" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
             <button type="submit" class="w-full rounded-full bg-gray-900 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-ember">Créer mon compte</button>
           </form>
         </div>
@@ -59,15 +87,6 @@
           </form>
         </div>
 
-        <div class="mt-8 flex items-center gap-3">
-          <span class="h-px flex-1 bg-gray-100"></span>
-          <span class="text-[11px] uppercase tracking-wide text-gray-400">ou</span>
-          <span class="h-px flex-1 bg-gray-100"></span>
-        </div>
-
-        <a href="{{ url('/checkout') }}" class="mt-5 block rounded-full border border-gray-200 py-3.5 text-center text-sm font-semibold text-gray-700 transition-colors hover:border-ember hover:text-ember">
-          Continuer comme invité
-        </a>
       </div>
     </div>
   </section>
@@ -87,5 +106,11 @@
       cible.classList.remove('text-gray-500');
     }
   }
+
+  // Si l'inscription a échoué (erreurs de validation), ouvrir cet onglet.
+  @if ($errors->has('name') || $errors->has('password'))
+    document.addEventListener('DOMContentLoaded', () => basculerOngletAuth('inscription',
+      document.querySelectorAll('.onglet-auth')[1]));
+  @endif
 </script>
 @endpush

@@ -8,6 +8,7 @@ use App\Models\Commande;
 use App\Models\LigneCommande;
 use App\Models\MouvementStock;
 use App\Models\Produit;
+use App\Models\User;
 use App\Services\PromotionService;
 use App\Support\Panier;
 use Illuminate\Http\RedirectResponse;
@@ -42,13 +43,12 @@ class CheckoutController extends Controller
                 ->with('erreur', 'Votre panier est vide — ajoutez des produits avant de passer commande.');
         }
 
-        // Aperçu des remises (le code éventuel + les remises membres déductibles
-        // du client en session) ; les frais réels dépendent du mode choisi et
-        // sont recalculés côté client puis, de façon faisant foi, à la validation.
+        // Aperçu des remises pour le client connecté ; les frais réels dépendent
+        // du mode choisi et sont recalculés, de façon faisant foi, à la validation.
         $promo = $this->promotions->evaluer(
             $lignes,
             Panier::codePromo(),
-            $this->promotions->contexteDepuisEmail(null, session('client_id')),
+            $this->promotions->contexteDepuisEmail(auth()->user()?->email),
         );
 
         return view('checkout.index', [
@@ -56,6 +56,8 @@ class CheckoutController extends Controller
             'promo' => $promo,
             'sousTotal' => $promo['sous_total'],
             'coutsLivraison' => self::COUTS_LIVRAISON,
+            // Fiche adresse existante du compte (préremplissage du formulaire).
+            'client' => Client::firstWhere('email', auth()->user()->email),
         ]);
     }
 
@@ -68,7 +70,6 @@ class CheckoutController extends Controller
         $donnees = $request->validate([
             'prenom' => ['required', 'string', 'max:100'],
             'nom' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:150'],
             'telephone' => ['required', 'string', 'max:30'],
             'adresse' => ['required', 'string', 'max:255'],
             'ville' => ['required', 'string', 'max:100'],
@@ -77,16 +78,18 @@ class CheckoutController extends Controller
             'mode_paiement' => ['required', 'in:carte,mobile_money,livraison'],
         ]);
 
+        // Le tunnel étant protégé par le middleware auth, l'utilisateur est
+        // toujours connecté : c'est lui qui identifie la commande (user_id).
+        $user = $request->user();
         $fraisLivraison = (float) self::COUTS_LIVRAISON[$donnees['mode_livraison']];
 
         try {
-            $commande = DB::transaction(fn () => $this->creerCommande($donnees, $fraisLivraison));
+            $commande = DB::transaction(fn () => $this->creerCommande($donnees, $fraisLivraison, $user));
         } catch (RuntimeException $e) {
             return back()->withInput()->with('erreur', $e->getMessage());
         }
 
         Panier::vider();
-        session(['client_id' => $commande->client_id]);
 
         $this->notifierAdmin($commande);
 
@@ -116,8 +119,14 @@ class CheckoutController extends Controller
         }
     }
 
-    public function confirmation(Commande $commande): \Illuminate\View\View
+    public function confirmation(Request $request, Commande $commande): \Illuminate\View\View
     {
+        // Une commande n'est visible que par son propriétaire (ou un admin).
+        abort_unless(
+            $commande->user_id === $request->user()->id || $request->user()->estAdmin(),
+            403,
+        );
+
         $commande->load(['lignes.produit', 'client', 'codePromo']);
 
         return view('checkout.confirmation', ['commande' => $commande]);
@@ -132,7 +141,7 @@ class CheckoutController extends Controller
      *
      * @param  array<string, mixed>  $donnees
      */
-    private function creerCommande(array $donnees, float $fraisLivraison): Commande
+    private function creerCommande(array $donnees, float $fraisLivraison, User $user): Commande
     {
         $panierBrut = Panier::contenu();
 
@@ -169,7 +178,7 @@ class CheckoutController extends Controller
         // (re)créer le client — de sorte qu'une remise « nouveaux clients » ne
         // se déclenche que sur une première commande — puis chiffrage central
         // sur les produits réellement validés (prix/stock verrouillés).
-        $contexte = $this->promotions->contexteDepuisEmail($donnees['email']);
+        $contexte = $this->promotions->contexteDepuisEmail($user->email);
         $promo = $this->promotions->evaluer(
             collect($lignesValidees),
             Panier::codePromo(),
@@ -177,12 +186,15 @@ class CheckoutController extends Controller
             $fraisLivraison,
         );
 
+        // Fiche client (carnet d'adresses) rattachée à l'e-mail du compte —
+        // conserve la compatibilité avec les promotions et le back-office.
         $client = Client::updateOrCreate(
-            ['email' => $donnees['email']],
+            ['email' => $user->email],
             [
                 'prenom' => $donnees['prenom'],
                 'nom' => $donnees['nom'],
                 'telephone' => $donnees['telephone'],
+                'whatsapp' => $user->whatsapp,
                 'adresse' => $donnees['adresse'],
                 'ville' => $donnees['ville'],
                 'code_postal' => $donnees['code_postal'] ?? null,
@@ -192,6 +204,7 @@ class CheckoutController extends Controller
         $commande = Commande::create([
             'numero' => $this->genererNumeroUnique(),
             'client_id' => $client->id,
+            'user_id' => $user->id,
             'code_promo_id' => $promo['code_promo']?->id,
             'statut' => 'en_attente',
             'total' => $promo['total'],

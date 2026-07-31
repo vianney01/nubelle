@@ -468,10 +468,16 @@
       <h2>Connexion à votre compte</h2>
       <form method="POST" action="{{ url('/connexion') }}">
         @csrf
-        <input type="email" name="email" placeholder="Adresse e-mail" required />
+        <input type="hidden" name="_form" value="connexion" />
+        <input type="email" name="email" value="{{ old('_form') === 'connexion' ? old('email') : '' }}" placeholder="Adresse e-mail" required />
         <input type="password" name="password" placeholder="Mot de passe" required />
         <button type="submit" class="btn-submit">Se connecter</button>
       </form>
+      @if (old('_form') === 'connexion' && $errors->any())
+        <div style="margin-top:10px;color:#dc2626;font-size:13px;text-align:left;">
+          @foreach ($errors->all() as $err)<p style="margin:2px 0;">{{ $err }}</p>@endforeach
+        </div>
+      @endif
       <p>Vous n'avez pas encore de compte ? <a href="#" onclick="switchTo('inscription'); return false;">Créer un compte</a></p>
     </div>
   </div>
@@ -483,15 +489,32 @@
       <h2>Créer un compte</h2>
       <form method="POST" action="{{ url('/inscription') }}">
         @csrf
-        <input type="text" name="name" placeholder="Nom complet" required />
-        <input type="email" name="email" placeholder="Adresse e-mail" required />
-        <input type="password" name="password" placeholder="Mot de passe" required />
+        <input type="hidden" name="_form" value="inscription" />
+        <input type="text" name="name" value="{{ old('_form') === 'inscription' ? old('name') : '' }}" placeholder="Nom complet" required />
+        <input type="email" name="email" value="{{ old('_form') === 'inscription' ? old('email') : '' }}" placeholder="Adresse e-mail" required />
+        <input type="tel" name="whatsapp" value="{{ old('_form') === 'inscription' ? old('whatsapp') : '' }}" placeholder="Numéro WhatsApp" required />
+        <small style="display:block;margin:-6px 0 8px;color:#999;font-size:12px;text-align:left;">Exemple : 0556400246 ou +2250556400246</small>
+        <input type="password" name="password" placeholder="Mot de passe (8 caractères min.)" required />
         <input type="password" name="password_confirmation" placeholder="Confirmer le mot de passe" required />
         <button type="submit" class="btn-submit">S'inscrire</button>
       </form>
+      @if (old('_form') === 'inscription' && $errors->any())
+        <div style="margin-top:10px;color:#dc2626;font-size:13px;text-align:left;">
+          @foreach ($errors->all() as $err)<p style="margin:2px 0;">{{ $err }}</p>@endforeach
+        </div>
+      @endif
       <p>Vous avez déjà un compte ? <a href="#" onclick="switchTo('connexion'); return false;">Se connecter</a></p>
     </div>
   </div>
+
+  {{-- Réouverture du popup auth en cas d'erreur de validation --}}
+  @if ($errors->any() && in_array(old('_form'), ['connexion', 'inscription'], true))
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (typeof ouvrirPopup === 'function') ouvrirPopup('{{ old('_form') }}');
+      });
+    </script>
+  @endif
 
   {{-- ============================ RECHERCHE ============================== --}}
   <div class="overlay" id="rechercheOverlay">
@@ -523,7 +546,7 @@
     <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
       <div>
         <h3 class="font-serif text-lg font-bold text-gray-900">Mon panier</h3>
-        <p class="text-xs text-gray-400">{{ $nbPanier ?? 0 }} article{{ ($nbPanier ?? 0) > 1 ? 's' : '' }}</p>
+        <p class="text-xs text-gray-400" id="miniPanierCount">{{ $nbPanier ?? 0 }} article{{ ($nbPanier ?? 0) > 1 ? 's' : '' }}</p>
       </div>
       <button type="button" onclick="togglePanierMobile()" aria-label="Fermer"
               class="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-cream hover:text-gray-900">
@@ -533,52 +556,10 @@
       </button>
     </div>
 
-    {{-- Contenu --}}
-    <div id="panierMobileContenu" class="flex-1 overflow-y-auto px-5">
-      @forelse ($lignesApercu->take(4) as $ligne)
-        <div class="flex items-center gap-3 py-4 {{ ! $loop->last ? 'border-b border-gray-50' : '' }}">
-          <a href="{{ url('/produit/'.$ligne['produit']->slug) }}"
-             class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-cream/50 ring-1 ring-black/5">
-            <img src="{{ $ligne['produit']['image'] }}" alt="{{ $ligne['produit']->nom }}" class="h-full w-full object-contain p-1">
-          </a>
-          <div class="min-w-0 flex-1">
-            <a href="{{ url('/produit/'.$ligne['produit']->slug) }}"
-               class="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 transition-colors hover:text-ember">{{ $ligne['produit']->nom }}</a>
-            <p class="mt-1 text-xs text-gray-400">{{ $ligne['quantite'] }} × {{ number_format($ligne['produit']->prix, 0, ',', ' ') }} FCFA</p>
-          </div>
-          <span class="shrink-0 text-sm font-bold text-ember">{{ number_format((float) $ligne['produit']->prix * $ligne['quantite'], 0, ',', ' ') }} FCFA</span>
-        </div>
-      @empty
-        <div class="flex h-full flex-col items-center justify-center py-16 text-center">
-          <span class="flex h-16 w-16 items-center justify-center rounded-full bg-cream text-ember">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.973-4.8 2.499-7.42a.75.75 0 0 0-.732-.905H5.106M7.5 14.25 5.106 5.165M6 18.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-            </svg>
-          </span>
-          <p class="mt-4 font-serif text-base text-gray-700">Votre panier est vide.</p>
-          <p class="mt-1 text-sm text-gray-400">Ajoutez des produits pour les retrouver ici.</p>
-        </div>
-      @endforelse
-      @if ($lignesApercu->count() > 4)
-        <p class="pb-4 pt-1 text-center text-xs text-gray-400">+ {{ $lignesApercu->count() - 4 }} autre(s) article(s)</p>
-      @endif
+    {{-- Corps rafraîchissable (liste + pied) --}}
+    <div id="miniPanierCorps" class="flex flex-1 flex-col overflow-hidden">
+      @include('partials.mini-panier', ['lignesApercu' => $lignesApercu, 'sousTotalApercu' => $sousTotalApercu])
     </div>
-
-    {{-- Pied --}}
-    @if ($lignesApercu->isNotEmpty())
-      <div class="border-t border-gray-100 px-5 py-4">
-        <div class="mb-4 flex items-baseline justify-between">
-          <span class="text-sm text-gray-500">Sous-total</span>
-          <span class="font-serif text-xl font-bold text-gray-900">{{ number_format($sousTotalApercu, 0, ',', ' ') }} FCFA</span>
-        </div>
-        <a href="{{ url('/checkout') }}" class="block w-full rounded-full bg-gray-900 px-5 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-ember">
-          Passer la commande
-        </a>
-        <a href="{{ url('/panier') }}" class="mt-2 block w-full rounded-full border border-gray-200 px-5 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:border-ember hover:text-ember">
-          Voir le panier
-        </a>
-      </div>
-    @endif
   </aside>
 
   {{-- ============================ MESSAGES FLASH ========================= --}}
@@ -639,6 +620,29 @@
     </div>
   </footer>
 
+  {{-- ===================== BOUTON WHATSAPP FLOTTANT ===================== --}}
+  <a href="https://wa.me/2250700000000?text={{ rawurlencode('Bonjour Nubelle 👋, j\'ai une question sur vos produits.') }}"
+     target="_blank" rel="noopener"
+     aria-label="Nous contacter sur WhatsApp"
+     class="wa-flottant group">
+    <span class="wa-pulse" aria-hidden="true"></span>
+    <span class="wa-bulle">Une question ? Écrivez-nous</span>
+    <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      <path d="M16.04 3.2c-7.1 0-12.86 5.76-12.86 12.86 0 2.27.6 4.49 1.73 6.44L3.2 28.8l6.47-1.69a12.8 12.8 0 0 0 6.37 1.62h.01c7.1 0 12.86-5.76 12.86-12.86 0-3.44-1.34-6.67-3.77-9.1a12.78 12.78 0 0 0-9.1-3.77Zm0 23.34h-.01a10.66 10.66 0 0 1-5.43-1.49l-.39-.23-4.03 1.06 1.08-3.93-.25-.4a10.63 10.63 0 0 1-1.63-5.68c0-5.9 4.8-10.7 10.71-10.7 2.86 0 5.55 1.12 7.57 3.14a10.63 10.63 0 0 1 3.13 7.57c0 5.9-4.8 10.7-10.7 10.7Zm5.87-8.02c-.32-.16-1.9-.94-2.2-1.05-.3-.11-.51-.16-.72.16-.21.32-.83 1.05-1.02 1.26-.19.21-.37.24-.69.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.65.14-.14.32-.37.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.72-1.74-.99-2.38-.26-.62-.52-.54-.72-.55l-.61-.01c-.21 0-.56.08-.85.4-.29.32-1.11 1.09-1.11 2.66 0 1.57 1.14 3.08 1.3 3.3.16.21 2.25 3.43 5.44 4.81.76.33 1.35.52 1.81.67.76.24 1.45.21 2 .13.61-.09 1.9-.78 2.17-1.53.27-.75.27-1.39.19-1.53-.08-.13-.29-.21-.61-.37Z"/>
+    </svg>
+  </a>
+  <style>
+    .wa-flottant{position:fixed;right:20px;bottom:20px;z-index:900;display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:9999px;background:#25D366;color:#fff;box-shadow:0 8px 24px rgba(37,211,102,.4);transition:transform .2s ease,box-shadow .2s ease;}
+    .wa-flottant:hover{transform:scale(1.08);box-shadow:0 10px 28px rgba(37,211,102,.55);}
+    .wa-flottant svg{width:32px;height:32px;position:relative;z-index:2;}
+    .wa-pulse{position:absolute;inset:0;border-radius:9999px;background:#25D366;opacity:.65;animation:wa-pulse 2s ease-out infinite;z-index:1;}
+    @keyframes wa-pulse{0%{transform:scale(1);opacity:.55;}70%{transform:scale(1.9);opacity:0;}100%{transform:scale(1.9);opacity:0;}}
+    .wa-bulle{position:absolute;right:64px;white-space:nowrap;background:#fff;color:#1f2937;font-size:13px;font-weight:500;padding:8px 14px;border-radius:9999px;box-shadow:0 4px 14px rgba(0,0,0,.12);opacity:0;transform:translateX(6px);pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
+    .wa-flottant:hover .wa-bulle{opacity:1;transform:translateX(0);}
+    @media (max-width:640px){.wa-flottant{width:52px;height:52px;right:16px;bottom:16px;}.wa-flottant svg{width:29px;height:29px;}.wa-bulle{display:none;}}
+    @media (prefers-reduced-motion:reduce){.wa-pulse{animation:none;opacity:0;}}
+  </style>
+
   @yield('popup')
 
   {{-- =========================== SCRIPTS GLOBAUX ======================== --}}
@@ -668,6 +672,31 @@
       if (backdrop) backdrop.classList.toggle("actif", ouvert);
       document.body.classList.toggle("overflow-hidden", ouvert);
     }
+    // Ouvre le panier latéral (sans le refermer s'il est déjà ouvert).
+    function ouvrirPanierMobile() {
+      const panier = document.getElementById("panierMobile");
+      if (!panier || panier.classList.contains("actif")) return;
+      togglePanierMobile();
+    }
+    window.ouvrirPanierMobile = ouvrirPanierMobile;
+
+    // Recharge le contenu du panier latéral (liste + sous-total) depuis le
+    // serveur et met à jour le compteur d'articles. Appelé après chaque ajout.
+    async function rafraichirMiniPanier(nbArticles, ouvrir = false) {
+      const compteur = document.getElementById('miniPanierCount');
+      if (compteur && typeof nbArticles === 'number') {
+        compteur.textContent = nbArticles + ' article' + (nbArticles > 1 ? 's' : '');
+      }
+      try {
+        const reponse = await fetch('{{ route('panier.apercu') }}', { headers: { 'Accept': 'text/html' } });
+        if (reponse.ok) {
+          const corps = document.getElementById('miniPanierCorps');
+          if (corps) corps.innerHTML = await reponse.text();
+        }
+      } catch (e) { /* silencieux : le badge reste à jour */ }
+      if (ouvrir) ouvrirPanierMobile();
+    }
+    window.rafraichirMiniPanier = rafraichirMiniPanier;
     document.addEventListener('click', function (event) {
       document.querySelectorAll('.compte').forEach(function (compte) {
         const dropdown = compte.querySelector('.dropdown-menu');
@@ -730,6 +759,7 @@
         if (data.succes) {
           document.querySelectorAll('.badge-panier, #badgePanierMobile').forEach(el => { el.textContent = data.nbPanier; });
           animerBadgePanier();
+          rafraichirMiniPanier(data.nbPanier, true);
           notifierNubelle(data.message || 'Produit ajouté au panier.', 'succes');
         } else {
           notifierNubelle(data.message || 'Produit indisponible.', 'erreur');

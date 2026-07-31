@@ -34,6 +34,7 @@ Route::get('/recherche/suggestions', [ProduitController::class, 'suggestions'])-
 
 // Panier & commande
 Route::get('/panier', [PanierController::class, 'index'])->name('panier.index');
+Route::get('/panier/apercu', [PanierController::class, 'apercu'])->name('panier.apercu');
 Route::post('/panier/ajouter/{produit:slug}', [PanierController::class, 'ajouter'])->name('panier.ajouter');
 
 // Code promo (déclaré avant les routes {produit:slug} pour éviter toute collision)

@@ -34,6 +34,10 @@ class AuthController extends Controller
         $identifiants = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
+        ], [
+            'email.required' => 'Veuillez saisir votre adresse e-mail.',
+            'email.email' => 'Adresse e-mail invalide.',
+            'password.required' => 'Veuillez saisir votre mot de passe.',
         ]);
 
         if (! Auth::attempt($identifiants, $request->boolean('remember'))) {
@@ -58,6 +62,15 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'max:180', 'unique:users,email'],
             'whatsapp' => ['required', 'string', 'max:30'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'name.required' => 'Le nom complet est obligatoire.',
+            'email.required' => "L'adresse e-mail est obligatoire.",
+            'email.email' => "L'adresse e-mail n'est pas valide.",
+            'email.unique' => 'Un compte existe déjà avec cette adresse e-mail.',
+            'whatsapp.required' => 'Le numéro WhatsApp est obligatoire.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ]);
 
         // Nettoyage + normalisation du numéro (+225XXXXXXXXXX), puis unicité.

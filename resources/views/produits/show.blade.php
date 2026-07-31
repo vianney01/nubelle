@@ -229,6 +229,7 @@
       if (data.succes) {
         document.querySelectorAll('.badge-panier, #badgePanierMobile').forEach(el => { el.textContent = data.nbPanier; });
         window.animerBadgePanier && window.animerBadgePanier();
+        window.rafraichirMiniPanier && window.rafraichirMiniPanier(data.nbPanier, true);
       }
     } finally {
       bouton.disabled = false;

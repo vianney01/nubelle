@@ -32,6 +32,20 @@ class PanierController extends Controller
         ]);
     }
 
+    /**
+     * Fragment HTML du panier latéral (liste + pied), rafraîchi côté client
+     * après un ajout au panier.
+     */
+    public function apercu()
+    {
+        $lignes = Panier::lignes();
+
+        return view('partials.mini-panier', [
+            'lignesApercu' => $lignes,
+            'sousTotalApercu' => (float) $lignes->sum(fn (array $l) => $l['produit']->prix * $l['quantite']),
+        ]);
+    }
+
     public function ajouter(Request $request, Produit $produit): JsonResponse|RedirectResponse
     {
         $quantite = max(1, (int) $request->input('quantite', 1));

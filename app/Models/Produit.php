@@ -24,6 +24,7 @@ class Produit extends Model
         'composition',
         'conseils',
         'image_principale',
+        'galerie',
         'prix',
         'ancien_prix',
         'stock',
@@ -34,6 +35,7 @@ class Produit extends Model
     ];
 
     protected $casts = [
+        'galerie' => 'array',
         'prix' => 'decimal:2',
         'ancien_prix' => 'decimal:2',
         'stock' => 'integer',
@@ -99,14 +101,49 @@ class Produit extends Model
      */
     protected function image(): Attribute
     {
+        return Attribute::get(fn () => $this->urlImage($this->image_principale));
+    }
+
+    /**
+     * Transforme un chemin stocké en URL affichable : les fichiers uploadés
+     * depuis Filament (ex: "produits/abc.png") passent par MediaController ;
+     * les anciens noms de démonstration (ex: "produit.jpeg") pointent vers
+     * public/images/. Voir la note sur l'accessor image() ci-dessus.
+     */
+    protected function urlImage(?string $chemin): ?string
+    {
+        if (blank($chemin)) {
+            return null;
+        }
+
+        return str_contains($chemin, '/')
+            ? route('media.show', ['path' => $chemin])
+            : asset('images/'.$chemin);
+    }
+
+    /**
+     * Liste ordonnée des URLs d'images du produit pour la galerie de la fiche
+     * produit : l'image de couverture (image_principale) en premier, suivie des
+     * images supplémentaires de `galerie`. Les doublons sont écartés.
+     *
+     * @return list<string>
+     */
+    protected function galerieImages(): Attribute
+    {
         return Attribute::get(function () {
-            if (blank($this->image_principale)) {
-                return null;
+            $urls = [];
+
+            if ($couverture = $this->image) {
+                $urls[] = $couverture;
             }
 
-            return str_contains($this->image_principale, '/')
-                ? route('media.show', ['path' => $this->image_principale])
-                : asset('images/'.$this->image_principale);
+            foreach ((array) ($this->galerie ?? []) as $chemin) {
+                if ($url = $this->urlImage($chemin)) {
+                    $urls[] = $url;
+                }
+            }
+
+            return array_values(array_unique($urls));
         });
     }
 

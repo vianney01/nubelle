@@ -30,12 +30,12 @@
                class="h-full w-full object-contain p-6 transition-transform duration-200 ease-out">
         </div>
 
-        @if (count($produit['images'] ?? []) > 1)
-          <div class="mt-4 flex gap-3">
-            @foreach ($produit['images'] as $img)
-              <button type="button" onclick="changerImageGalerie('{{ asset('images/'.$img) }}', this)"
+        @if (count($produit['galerie_images'] ?? []) > 1)
+          <div class="mt-4 flex flex-wrap gap-3">
+            @foreach ($produit['galerie_images'] as $img)
+              <button type="button" onclick="changerImageGalerie('{{ $img }}', this)"
                       class="galerie-miniature h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-cream/50 ring-1 ring-black/5 transition-all {{ $loop->first ? 'ring-2 ring-ember' : '' }}">
-                <img src="{{ asset('images/'.$img) }}" alt="" class="h-full w-full object-contain p-1.5">
+                <img src="{{ $img }}" alt="" class="h-full w-full object-contain p-1.5">
               </button>
             @endforeach
           </div>

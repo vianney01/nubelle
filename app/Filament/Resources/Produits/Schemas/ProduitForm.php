@@ -47,6 +47,18 @@ class ProduitForm
                             ->directory('produits')
                             ->imageEditor()
                             ->columnSpanFull(),
+                        FileUpload::make('galerie')
+                            ->label('Galerie (images supplémentaires)')
+                            ->helperText('Glissez-déposez plusieurs images. Réorganisez-les par glisser-déposer.')
+                            ->image()
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
+                            ->disk('public')
+                            ->directory('produits')
+                            ->imageEditor()
+                            ->panelLayout('grid')
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Prix & stock')

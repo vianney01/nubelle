@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Whatsapp;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,7 +26,7 @@ class ContenuAccueil extends Model
         'apropos_image', 'apropos_sous_titre', 'apropos_titre', 'apropos_texte', 'apropos_bouton_texte', 'apropos_bouton_lien',
         'popup_actif', 'popup_image', 'popup_badge', 'popup_titre', 'popup_sous_titre',
         'popup_code_promo_id', 'popup_bouton_texte', 'popup_bouton_lien', 'popup_cible',
-        'tiktok_url', 'facebook_url', 'instagram_url',
+        'tiktok_url', 'facebook_url', 'instagram_url', 'whatsapp_numero',
         'reseaux_eyebrow', 'reseaux_titre', 'reseaux_images',
     ];
 
@@ -68,6 +69,7 @@ class ContenuAccueil extends Model
         'tiktok_url' => 'https://www.tiktok.com/@nubellecosmetics',
         'facebook_url' => 'https://www.facebook.com/nubellecosmetics',
         'instagram_url' => 'https://www.instagram.com/nubellecosmetics',
+        'whatsapp_numero' => '+2250700000000',
 
         'reseaux_eyebrow' => '@nubellecosmetics',
         'reseaux_titre' => 'Suivez-nous sur nos réseaux sociaux',
@@ -100,6 +102,30 @@ class ContenuAccueil extends Model
     protected function popupImageUrl(): Attribute
     {
         return Attribute::get(fn () => $this->urlImage($this->popup_image));
+    }
+
+    /**
+     * Numéro WhatsApp prêt pour un lien https://wa.me/… (chiffres sans « + »),
+     * ou null si aucun numéro valide n'est configuré (le bouton est alors masqué).
+     */
+    protected function whatsappLien(): Attribute
+    {
+        return Attribute::get(fn () => Whatsapp::pourLienWa(Whatsapp::normaliser($this->whatsapp_numero)));
+    }
+
+    /**
+     * Numéro formaté pour l'affichage (ex : « +225 07 00 00 00 00 »).
+     */
+    protected function whatsappAffichage(): Attribute
+    {
+        return Attribute::get(function () {
+            $normalise = Whatsapp::normaliser($this->whatsapp_numero);
+            if ($normalise === null) {
+                return $this->whatsapp_numero;
+            }
+
+            return '+225 '.implode(' ', str_split(substr($normalise, 4), 2));
+        });
     }
 
     /**

@@ -37,6 +37,20 @@ class AppServiceProvider extends ServiceProvider
                 'facebook' => $contenu->facebook_url,
                 'instagram' => $contenu->instagram_url,
             ]));
+
+            // Numéro WhatsApp de la boutique (bouton flottant, menu, contact).
+            $view->with('whatsappLien', $contenu->whatsapp_lien);
+            $view->with('whatsappTel', $contenu->whatsapp_numero);
+            $view->with('whatsappAffichage', $contenu->whatsapp_affichage);
+        });
+
+        // La page Contact utilise le numéro WhatsApp dans son propre contenu
+        // (bloc coordonnées), rendu avant le layout : on le lui partage aussi.
+        View::composer('pages.contact', function ($view) {
+            $contenu = ContenuAccueil::instance();
+            $view->with('whatsappLien', $contenu->whatsapp_lien);
+            $view->with('whatsappTel', $contenu->whatsapp_numero);
+            $view->with('whatsappAffichage', $contenu->whatsapp_affichage);
         });
     }
 }

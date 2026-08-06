@@ -32,16 +32,16 @@
       {{-- ============================= COORDONNÉES ============================ --}}
       <aside class="space-y-4">
         <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5">
-          <a href="tel:+2250700000000" class="flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-cream/50">
+          <a href="tel:{{ $whatsappTel ?? '' }}" class="flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-cream/50">
             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-cream text-ember">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 0 0-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97a1.125 1.125 0 0 0 .417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" /></svg>
             </span>
             <span>
               <span class="block text-xs text-gray-400">Téléphone</span>
-              <span class="font-semibold text-gray-800">+225 07 00 00 00 00</span>
+              <span class="font-semibold text-gray-800">{{ $whatsappAffichage ?? '' }}</span>
             </span>
           </a>
-          <a href="https://wa.me/2250700000000" target="_blank" rel="noopener" class="flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-cream/50">
+          <a href="{{ !empty($whatsappLien) ? 'https://wa.me/'.$whatsappLien : '#' }}" @if(!empty($whatsappLien)) target="_blank" rel="noopener" @endif class="flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-cream/50">
             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-cream text-ember">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 12a8.25 8.25 0 1 1-12.6-7.02L4.5 4.2l1.06 3.4A8.2 8.2 0 0 1 12 3.75a8.25 8.25 0 0 1 8.25 8.25Z" />

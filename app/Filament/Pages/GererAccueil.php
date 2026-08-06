@@ -173,6 +173,12 @@ class GererAccueil extends Page implements HasForms
                     ->description('Liens affichés dans le pied de page et le menu latéral, sur tout le site. Laisser un champ vide masque l’icône correspondante.')
                     ->columns(1)
                     ->schema([
+                        TextInput::make('whatsapp_numero')
+                            ->label('Numéro WhatsApp')
+                            ->tel()
+                            ->maxLength(30)
+                            ->placeholder('0700000000 ou +2250700000000')
+                            ->helperText('Utilisé par le bouton flottant, l’icône du menu et la page Contact. Laisser vide masque le bouton WhatsApp.'),
                         TextInput::make('tiktok_url')
                             ->label('TikTok')
                             ->url()
@@ -194,7 +200,27 @@ class GererAccueil extends Page implements HasForms
 
     public function save(): void
     {
-        ContenuAccueil::instance()->update($this->form->getState());
+        $donnees = $this->form->getState();
+
+        // Le numéro WhatsApp est normalisé (+225XXXXXXXXXX) avant enregistrement.
+        // Un numéro non vide mais invalide bloque l'enregistrement.
+        if (filled($donnees['whatsapp_numero'] ?? null)) {
+            $normalise = \App\Support\Whatsapp::normaliser($donnees['whatsapp_numero']);
+
+            if ($normalise === null) {
+                Notification::make()
+                    ->title('Numéro WhatsApp invalide')
+                    ->body('Exemple attendu : 0700000000 ou +2250700000000.')
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+
+            $donnees['whatsapp_numero'] = $normalise;
+        }
+
+        ContenuAccueil::instance()->update($donnees);
 
         Notification::make()
             ->title('Contenus enregistrés — visibles immédiatement sur la page d’accueil.')

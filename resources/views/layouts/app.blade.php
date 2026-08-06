@@ -449,7 +449,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 3.5c.45 2.1 1.85 3.4 4 3.55V10c-1.45-.05-2.8-.5-4-1.35v6.1a5.15 5.15 0 1 1-4.45-5.1v3.05a2.1 2.1 0 1 0 1.45 2v-11.2Z" />
             </svg>
           </a>
-          <a href="https://wa.me/2250700000000" target="_blank" rel="noopener" aria-label="WhatsApp" class="drawer-social">
+          <a href="{{ !empty($whatsappLien) ? 'https://wa.me/'.$whatsappLien : '#' }}" @if(!empty($whatsappLien)) target="_blank" rel="noopener" @endif aria-label="WhatsApp" class="drawer-social">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 12a8.25 8.25 0 1 1-12.6-7.02L4.5 4.2l1.06 3.4A8.2 8.2 0 0 1 12 3.75a8.25 8.25 0 0 1 8.25 8.25Z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.5c.3 2.6 2.1 4.4 4.7 4.7.8.1 1.3-.7 1-1.3l-.6-1-1.6.4a4 4 0 0 1-2-2l.4-1.6-1-.6c-.6-.3-1.4.2-1.3 1Z" />
@@ -645,7 +645,8 @@
   </footer>
 
   {{-- ===================== BOUTON WHATSAPP FLOTTANT ===================== --}}
-  <a href="https://wa.me/2250700000000?text={{ rawurlencode('Bonjour Nubelle 👋, j\'ai une question sur vos produits.') }}"
+  @if (!empty($whatsappLien))
+  <a href="https://wa.me/{{ $whatsappLien }}?text={{ rawurlencode('Bonjour Nubelle 👋, j\'ai une question sur vos produits.') }}"
      target="_blank" rel="noopener"
      aria-label="Nous contacter sur WhatsApp"
      class="wa-flottant group">
@@ -666,6 +667,7 @@
     @media (max-width:640px){.wa-flottant{width:52px;height:52px;right:16px;bottom:16px;}.wa-flottant svg{width:29px;height:29px;}.wa-bulle{display:none;}}
     @media (prefers-reduced-motion:reduce){.wa-pulse{animation:none;opacity:0;}}
   </style>
+  @endif
 
   @yield('popup')
 

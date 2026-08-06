@@ -127,6 +127,21 @@
     </div>
   </section>
 
+  {{-- =========================== NEWSLETTER BAND ======================= --}}
+  <section class="reveal mx-4 sm:mx-auto sm:max-w-5xl my-16 rounded-3xl bg-gradient-to-r from-ember to-sienna px-6 sm:px-14 py-12 text-center shadow-xl shadow-ember/20">
+    <p class="text-white/80 text-xs sm:text-sm uppercase tracking-[0.25em] mb-2">Restez informée</p>
+    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white mb-3">-10% sur votre première commande</h2>
+    <p class="text-white/85 text-sm mb-6 max-w-md mx-auto">Inscrivez-vous à notre newsletter pour recevoir nos nouveautés et offres exclusives en avant-première.</p>
+    <form onsubmit="event.preventDefault(); alert('Merci pour votre inscription !');" class="flex flex-wrap justify-center gap-3 max-w-md mx-auto">
+      <input type="email" required placeholder="Votre adresse email"
+             class="flex-1 min-w-[200px] rounded-full border-0 px-5 py-3 text-sm text-gray-800 shadow-inner focus:outline-none focus:ring-2 focus:ring-white">
+      <button type="submit"
+              class="rounded-full bg-white px-6 py-3 text-sm font-semibold text-ember transition-transform duration-300 hover:scale-105">
+        Je m'inscris
+      </button>
+    </form>
+  </section>
+
   {{-- ========================== AVIS CLIENTS ========================= --}}
   <section id="avis" class="py-16 bg-cream/40">
     <x-section-heading eyebrow="Ils nous font confiance" title="Avis de nos clients" />
@@ -168,28 +183,13 @@
     </div>
   </div>
 
-  {{-- =========================== NEWSLETTER BAND ======================= --}}
-  <section class="reveal mx-4 sm:mx-auto sm:max-w-5xl my-16 rounded-3xl bg-gradient-to-r from-ember to-sienna px-6 sm:px-14 py-12 text-center shadow-xl shadow-ember/20">
-    <p class="text-white/80 text-xs sm:text-sm uppercase tracking-[0.25em] mb-2">Restez informée</p>
-    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white mb-3">-10% sur votre première commande</h2>
-    <p class="text-white/85 text-sm mb-6 max-w-md mx-auto">Inscrivez-vous à notre newsletter pour recevoir nos nouveautés et offres exclusives en avant-première.</p>
-    <form onsubmit="event.preventDefault(); alert('Merci pour votre inscription !');" class="flex flex-wrap justify-center gap-3 max-w-md mx-auto">
-      <input type="email" required placeholder="Votre adresse email"
-             class="flex-1 min-w-[200px] rounded-full border-0 px-5 py-3 text-sm text-gray-800 shadow-inner focus:outline-none focus:ring-2 focus:ring-white">
-      <button type="submit"
-              class="rounded-full bg-white px-6 py-3 text-sm font-semibold text-ember transition-transform duration-300 hover:scale-105">
-        Je m'inscris
-      </button>
-    </form>
-  </section>
-
   {{-- ============================ INSTAGRAM FEED ======================= --}}
   <section class="max-w-6xl mx-auto px-5 py-16">
-    <x-section-heading eyebrow="@nubellecosmetics" title="Suivez-nous sur Instagram" />
+    <x-section-heading :eyebrow="$accueil->reseaux_eyebrow" :title="$accueil->reseaux_titre" />
     <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
-      @foreach (['produit.jpeg','Produit2.jpeg','produit3.jpeg','produit4.jpeg','accueil.jpg','createur.jpg'] as $img)
-        <a href="#" class="group relative block aspect-square overflow-hidden rounded-xl">
-          <img src="{{ asset('images/'.$img) }}" alt="Publication Instagram Nubelle"
+      @foreach ($accueil->reseaux_images_urls as $img)
+        <a href="{{ $accueil->instagram_url ?? '#' }}" @if($accueil->instagram_url) target="_blank" rel="noopener" @endif class="group relative block aspect-square overflow-hidden rounded-xl">
+          <img src="{{ $img }}" alt="Publication Nubelle"
                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110">
           <span class="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-300 group-hover:bg-black/40">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">

@@ -148,6 +148,47 @@ class GererAccueil extends Page implements HasForms
                         TextInput::make('popup_bouton_texte')->label('Texte du bouton')->maxLength(60),
                         TextInput::make('popup_bouton_lien')->label('Lien du bouton')->maxLength(255)->placeholder('/connexion'),
                     ]),
+
+                Section::make('Bloc « Suivez-nous » (page d’accueil)')
+                    ->description('Le titre et le mur de photos affichés en bas de la page d’accueil.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('reseaux_eyebrow')->label('Petit titre')->maxLength(150)->placeholder('@nubellecosmetics'),
+                        TextInput::make('reseaux_titre')->label('Titre')->maxLength(150)->placeholder('Suivez-nous sur nos réseaux sociaux'),
+                        FileUpload::make('reseaux_images')
+                            ->label('Images du mur')
+                            ->helperText('Ajoutez plusieurs images (glisser-déposer). Réorganisez-les par glisser-déposer.')
+                            ->image()
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
+                            ->disk('public')
+                            ->directory('accueil')
+                            ->imageEditor()
+                            ->panelLayout('grid')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Réseaux sociaux')
+                    ->description('Liens affichés dans le pied de page et le menu latéral, sur tout le site. Laisser un champ vide masque l’icône correspondante.')
+                    ->columns(1)
+                    ->schema([
+                        TextInput::make('tiktok_url')
+                            ->label('TikTok')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://www.tiktok.com/@nubellecosmetics'),
+                        TextInput::make('facebook_url')
+                            ->label('Facebook')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://www.facebook.com/nubellecosmetics'),
+                        TextInput::make('instagram_url')
+                            ->label('Instagram')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://www.instagram.com/nubellecosmetics'),
+                    ]),
             ]);
     }
 

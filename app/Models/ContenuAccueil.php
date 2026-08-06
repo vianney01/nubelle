@@ -25,10 +25,13 @@ class ContenuAccueil extends Model
         'apropos_image', 'apropos_sous_titre', 'apropos_titre', 'apropos_texte', 'apropos_bouton_texte', 'apropos_bouton_lien',
         'popup_actif', 'popup_image', 'popup_badge', 'popup_titre', 'popup_sous_titre',
         'popup_code_promo_id', 'popup_bouton_texte', 'popup_bouton_lien', 'popup_cible',
+        'tiktok_url', 'facebook_url', 'instagram_url',
+        'reseaux_eyebrow', 'reseaux_titre', 'reseaux_images',
     ];
 
     protected $casts = [
         'popup_actif' => 'boolean',
+        'reseaux_images' => 'array',
     ];
 
     /**
@@ -61,6 +64,13 @@ class ContenuAccueil extends Model
         'popup_bouton_texte' => 'Créer mon compte',
         'popup_bouton_lien' => '/connexion',
         'popup_cible' => 'non_connectes',
+
+        'tiktok_url' => 'https://www.tiktok.com/@nubellecosmetics',
+        'facebook_url' => 'https://www.facebook.com/nubellecosmetics',
+        'instagram_url' => 'https://www.instagram.com/nubellecosmetics',
+
+        'reseaux_eyebrow' => '@nubellecosmetics',
+        'reseaux_titre' => 'Suivez-nous sur nos réseaux sociaux',
     ];
 
     /**
@@ -90,6 +100,21 @@ class ContenuAccueil extends Model
     protected function popupImageUrl(): Attribute
     {
         return Attribute::get(fn () => $this->urlImage($this->popup_image));
+    }
+
+    /**
+     * URLs affichables des images du bloc « Suivez-nous » (mur de photos de la
+     * page d'accueil). Chemins uploadés via Filament ou anciens fichiers de
+     * démonstration, résolus par urlImage().
+     *
+     * @return list<string>
+     */
+    protected function reseauxImagesUrls(): Attribute
+    {
+        return Attribute::get(fn () => array_values(array_filter(array_map(
+            fn ($chemin) => $this->urlImage($chemin),
+            (array) ($this->reseaux_images ?? [])
+        ))));
     }
 
     /**

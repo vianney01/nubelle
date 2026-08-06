@@ -432,24 +432,24 @@
       {{-- Pied du menu --}}
       <div class="drawer-row px-5 pb-6 pt-2">
         <div class="flex items-center justify-center gap-3">
-          <a href="#" aria-label="Instagram" class="drawer-social">
+          <a href="{{ $reseaux['instagram'] ?? '#' }}" @if(!empty($reseaux['instagram'])) target="_blank" rel="noopener" @endif aria-label="Instagram" class="drawer-social">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
               <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
               <circle cx="12" cy="12" r="4" />
               <circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none" />
             </svg>
           </a>
-          <a href="#" aria-label="Facebook" class="drawer-social">
+          <a href="{{ $reseaux['facebook'] ?? '#' }}" @if(!empty($reseaux['facebook'])) target="_blank" rel="noopener" @endif aria-label="Facebook" class="drawer-social">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.5 21v-7.5h2.5l.5-3.25h-3V8.1c0-.94.26-1.6 1.62-1.6H17.5V3.6C17.2 3.56 16.2 3.47 15 3.47c-2.4 0-4 1.46-4 4.15v2.63H8.5v3.25H11V21" />
             </svg>
           </a>
-          <a href="#" aria-label="TikTok" class="drawer-social">
+          <a href="{{ $reseaux['tiktok'] ?? '#' }}" @if(!empty($reseaux['tiktok'])) target="_blank" rel="noopener" @endif aria-label="TikTok" class="drawer-social">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 3.5c.45 2.1 1.85 3.4 4 3.55V10c-1.45-.05-2.8-.5-4-1.35v6.1a5.15 5.15 0 1 1-4.45-5.1v3.05a2.1 2.1 0 1 0 1.45 2v-11.2Z" />
             </svg>
           </a>
-          <a href="#" aria-label="WhatsApp" class="drawer-social">
+          <a href="https://wa.me/2250700000000" target="_blank" rel="noopener" aria-label="WhatsApp" class="drawer-social">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 12a8.25 8.25 0 1 1-12.6-7.02L4.5 4.2l1.06 3.4A8.2 8.2 0 0 1 12 3.75a8.25 8.25 0 0 1 8.25 8.25Z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.5c.3 2.6 2.1 4.4 4.7 4.7.8.1 1.3-.7 1-1.3l-.6-1-1.6.4a4 4 0 0 1-2-2l.4-1.6-1-.6c-.6-.3-1.4.2-1.3 1Z" />
@@ -597,10 +597,34 @@
         <button type="submit">Je m'inscris</button>
       </form>
     </div>
-    <div class="reseaux">
-      <a href="#"><img src="{{ asset('images/facebook.png') }}" alt="Facebook"></a>
-      <a href="#"><img src="{{ asset('images/instagram.png') }}" alt="Instagram"></a>
-    </div>
+    @if (!empty($reseaux))
+      <div class="reseaux">
+        @foreach ($reseaux as $type => $url)
+          <a href="{{ $url }}" target="_blank" rel="noopener" aria-label="{{ ucfirst($type) }}" class="nub-reseau nub-reseau--{{ $type }}">
+            @switch($type)
+              @case('tiktok')
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3.5c.45 2.1 1.85 3.4 4 3.55V10c-1.45-.05-2.8-.5-4-1.35v6.1a5.15 5.15 0 1 1-4.45-5.1v3.05a2.1 2.1 0 1 0 1.45 2v-11.2Z"/></svg>
+                @break
+              @case('facebook')
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M14.5 21v-7.5h2.5l.5-3.25h-3V8.1c0-.94.26-1.6 1.62-1.6H17.5V3.6C17.2 3.56 16.2 3.47 15 3.47c-2.4 0-4 1.46-4 4.15v2.63H8.5v3.25H11V21"/></svg>
+                @break
+              @case('instagram')
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none"/></svg>
+                @break
+            @endswitch
+          </a>
+        @endforeach
+      </div>
+      <style>
+        .reseaux{display:flex;justify-content:center;gap:14px;margin-bottom:30px;}
+        .nub-reseau{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:9999px;color:#fff;transition:transform .2s ease,box-shadow .2s ease;}
+        .nub-reseau svg{width:21px;height:21px;}
+        .nub-reseau:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.18);}
+        .nub-reseau--tiktok{background:#111;}
+        .nub-reseau--facebook{background:#1877F2;}
+        .nub-reseau--instagram{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
+      </style>
+    @endif
     <div class="footer-liens">
       <div class="liens">
         <a href="{{ url('/contact') }}">Contact</a>

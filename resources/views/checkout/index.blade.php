@@ -40,9 +40,16 @@
                      class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 focus:outline-none">
             </div>
             <div class="sm:col-span-2">
-              <input type="text" name="adresse" value="{{ old('adresse', $client->adresse ?? '') }}" required placeholder="Adresse"
-                     class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
-              @error('adresse') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+              <select name="commune_id" id="communeSelect" required onchange="majLivraisonCheckout()"
+                      class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 focus:border-ember focus:outline-none focus:ring-1 focus:ring-ember">
+                <option value="">Choisir ma commune…</option>
+                @foreach ($communes as $commune)
+                  <option value="{{ $commune->id }}" data-prix="{{ $commune->prix }}" {{ (string) old('commune_id') === (string) $commune->id ? 'selected' : '' }}>
+                    {{ $commune->nom }}
+                  </option>
+                @endforeach
+              </select>
+              @error('commune_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>
             <div>
               <input type="text" name="ville" value="{{ old('ville', $client->ville ?? '') }}" required placeholder="Ville"
@@ -66,22 +73,40 @@
             <h2 class="font-serif text-lg font-bold text-gray-900">Mode de livraison</h2>
           </div>
           <div class="space-y-3">
+
+            {{-- Livraison express — finalisée sur WhatsApp --}}
             <label class="flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 px-4 py-3 has-[:checked]:border-ember has-[:checked]:bg-cream/40">
               <span class="flex items-center gap-3">
-                <input type="radio" name="mode_livraison" value="gratuite" checked onchange="recalculerLivraisonCheckout()" class="text-ember focus:ring-ember">
-                <span class="text-sm font-medium text-gray-800">Point relais — 24 à 72h</span>
-              </span>
-              <span class="text-sm font-semibold text-green-600">Gratuite</span>
-            </label>
-            <label class="flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 px-4 py-3 has-[:checked]:border-ember has-[:checked]:bg-cream/40">
-              <span class="flex items-center gap-3">
-                <input type="radio" name="mode_livraison" value="express" onchange="recalculerLivraisonCheckout()" class="text-ember focus:ring-ember">
+                <input type="radio" name="mode_livraison" value="express" onchange="majLivraisonCheckout()" class="text-ember focus:ring-ember" {{ old('mode_livraison') === 'express' ? 'checked' : '' }}>
                 <span class="text-sm font-medium text-gray-800">Livraison express — 24h</span>
               </span>
-              <span class="text-sm font-semibold text-gray-800">2 500 FCFA</span>
+              <span class="text-xs font-semibold text-green-600">Prix sur WhatsApp</span>
             </label>
+
+            {{-- Livraison normale — prix selon la commune choisie plus haut --}}
+            <label class="flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 px-4 py-3 has-[:checked]:border-ember has-[:checked]:bg-cream/40">
+              <span class="flex items-center gap-3">
+                <input type="radio" name="mode_livraison" value="normale" onchange="majLivraisonCheckout()" class="text-ember focus:ring-ember" {{ old('mode_livraison', 'normale') === 'normale' ? 'checked' : '' }}>
+                <span class="text-sm font-medium text-gray-800">Livraison normale</span>
+              </span>
+              <span id="prixNormale" class="text-xs text-gray-400">selon votre commune</span>
+            </label>
+
+            {{-- Expédition — finalisée sur WhatsApp --}}
+            <label class="flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 px-4 py-3 has-[:checked]:border-ember has-[:checked]:bg-cream/40">
+              <span class="flex items-center gap-3">
+                <input type="radio" name="mode_livraison" value="expedition" onchange="majLivraisonCheckout()" class="text-ember focus:ring-ember" {{ old('mode_livraison') === 'expedition' ? 'checked' : '' }}>
+                <span class="text-sm font-medium text-gray-800">Expédition</span>
+              </span>
+              <span class="text-xs font-semibold text-green-600">Prix sur WhatsApp</span>
+            </label>
+
             @error('mode_livraison') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
           </div>
+          <p class="mt-3 flex items-center gap-1.5 text-xs text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.3 4.4-1.2A10 10 0 1 0 12 2Z" opacity=".15"/><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.3 4.4-1.2A10 10 0 1 0 12 2Zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.4.6.7-2.3-.2-.3A8 8 0 0 1 12 4Z"/></svg>
+            Votre commande sera finalisée sur WhatsApp après confirmation.
+          </p>
         </div>
 
         {{-- ============================ 3. PAIEMENT ============================ --}}
@@ -159,7 +184,10 @@
         <button type="submit" class="mt-6 block w-full rounded-full bg-gradient-to-r from-ember to-sienna py-3.5 text-center text-sm font-semibold text-white shadow-lg shadow-ember/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
           Confirmer ma commande
         </button>
-        <p class="mt-3 text-center text-[11px] text-gray-400">Paiement sécurisé — vos données ne sont jamais partagées.</p>
+        <p class="mt-3 flex items-center justify-center gap-1.5 text-center text-[11px] text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-green-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.3 4.4-1.2A10 10 0 1 0 12 2Zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.4.6.7-2.3-.2-.3A8 8 0 0 1 12 4Z"/></svg>
+          Vous serez redirigé vers WhatsApp pour finaliser.
+        </p>
       </aside>
     </form>
   </section>
@@ -168,21 +196,47 @@
 
 @push('scripts')
 <script>
-  const coutsLivraisonCheckout = @json($coutsLivraison);
   const reductionCheckout = {{ $promo['reduction_totale'] }};
 
   function formatFCFACheckout(n) {
     return new Intl.NumberFormat('fr-FR').format(Math.round(n)) + ' FCFA';
   }
 
-  function recalculerLivraisonCheckout() {
-    const mode = document.querySelector('input[name="mode_livraison"]:checked')?.value ?? 'gratuite';
-    const cout = coutsLivraisonCheckout[mode] ?? 0;
+  function majLivraisonCheckout() {
+    const mode = document.querySelector('input[name="mode_livraison"]:checked')?.value ?? 'normale';
+    const select = document.getElementById('communeSelect');
     const sousTotal = parseFloat(document.getElementById('sousTotalCheckout').dataset.valeur);
-    const total = Math.max(0, sousTotal - reductionCheckout) + cout;
 
-    document.getElementById('livraisonCheckout').textContent = cout === 0 ? 'Gratuite' : formatFCFACheckout(cout);
+    // Prix de la commune choisie dans la section « Adresse de livraison ».
+    const prixCommune = (select && select.value)
+      ? (parseFloat(select.options[select.selectedIndex].dataset.prix || '0') || 0)
+      : null;
+
+    // Étiquette de prix à côté de l'option « Livraison normale ».
+    const prixNormale = document.getElementById('prixNormale');
+    if (prixNormale) {
+      prixNormale.textContent = (prixCommune === null)
+        ? 'selon votre commune'
+        : (prixCommune === 0 ? 'Gratuite' : formatFCFACheckout(prixCommune));
+    }
+
+    let cout = 0;
+    let libelle = 'À convenir sur WhatsApp';
+
+    if (mode === 'normale') {
+      if (prixCommune === null) {
+        libelle = 'Choisir une commune';
+      } else {
+        cout = prixCommune;
+        libelle = cout === 0 ? 'Gratuite' : formatFCFACheckout(cout);
+      }
+    }
+
+    const total = Math.max(0, sousTotal - reductionCheckout) + cout;
+    document.getElementById('livraisonCheckout').textContent = libelle;
     document.getElementById('totalCheckout').textContent = formatFCFACheckout(total);
   }
+
+  document.addEventListener('DOMContentLoaded', majLivraisonCheckout);
 </script>
 @endpush

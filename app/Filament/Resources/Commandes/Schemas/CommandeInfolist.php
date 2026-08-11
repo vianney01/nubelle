@@ -179,7 +179,10 @@ class CommandeInfolist
                             ->label('Méthode')
                             ->state(fn (Commande $record) => $record->methodeLivraison()),
                         TextEntry::make('adresse_livraison')->label('Adresse')->placeholder('—')->columnSpanFull(),
-                        TextEntry::make('client.ville')->label('Commune / Ville')->placeholder('—'),
+                        TextEntry::make('commune')
+                            ->label('Commune / Ville')
+                            ->state(fn (Commande $record) => $record->commune ?: $record->client?->ville)
+                            ->placeholder('—'),
                         TextEntry::make('pays')->label('Pays')->state("Côte d'Ivoire"),
                     ]),
 

@@ -43,9 +43,17 @@ class Commande extends Model
         'reduction_type',
         'remise_membre',
         'frais_livraison',
+        'mode_livraison',
+        'commune',
         'adresse_livraison',
         'mode_paiement',
         'reference_paiement',
+    ];
+
+    public const MODES_LIVRAISON_LABELS = [
+        'express' => 'Livraison express',
+        'normale' => 'Livraison normale',
+        'expedition' => 'Expédition',
     ];
 
     protected $casts = [
@@ -102,12 +110,24 @@ class Commande extends Model
     }
 
     /**
-     * Méthode de livraison déduite des frais (aucune colonne dédiée) :
-     * gratuite = point relais, payante = express.
+     * Libellé lisible du mode de livraison choisi. La « livraison normale »
+     * précise la commune ; express/expédition sont convenues sur WhatsApp.
      */
     public function methodeLivraison(): string
     {
-        return (float) $this->frais_livraison > 0 ? 'Livraison express (24h)' : 'Point relais (24–72h)';
+        $label = self::MODES_LIVRAISON_LABELS[$this->mode_livraison] ?? null;
+
+        if ($label === null) {
+            // Anciennes commandes sans colonne mode_livraison : on retombe sur
+            // la déduction historique par les frais.
+            return (float) $this->frais_livraison > 0 ? 'Livraison express' : 'Point relais';
+        }
+
+        if ($this->mode_livraison === 'normale' && filled($this->commune)) {
+            return $label.' — '.$this->commune;
+        }
+
+        return $label;
     }
 
     public function lignes(): HasMany

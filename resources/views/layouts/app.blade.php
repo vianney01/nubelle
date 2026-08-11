@@ -646,7 +646,7 @@
 
   {{-- ===================== BOUTON WHATSAPP FLOTTANT ===================== --}}
   @if (!empty($whatsappLien))
-  <a href="https://wa.me/{{ $whatsappLien }}?text={{ rawurlencode('Bonjour Nubelle 👋, j\'ai une question sur vos produits.') }}"
+  <a href="https://wa.me/{{ $whatsappLien }}?text={{ rawurlencode('Bonjour Nubelle, j\'ai une question sur vos produits.') }}"
      target="_blank" rel="noopener"
      aria-label="Nous contacter sur WhatsApp"
      class="wa-flottant group">

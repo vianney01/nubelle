@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Mail\NouvelleCommandeMail;
 use App\Models\Client;
 use App\Models\Commande;
+use App\Models\Commune;
+use App\Models\ContenuAccueil;
 use App\Models\LigneCommande;
 use App\Models\MouvementStock;
 use App\Models\Produit;
@@ -22,13 +24,11 @@ use Throwable;
 class CheckoutController extends Controller
 {
     /**
-     * Coûts de livraison disponibles — partagés entre l'affichage (index)
-     * et le calcul serveur faisant foi (valider).
+     * Modes de livraison acceptés. « normale » est tarifée à la commune ;
+     * « express » et « expedition » n'ont pas de prix fixe (convenu sur
+     * WhatsApp). Toutes les commandes sont ensuite finalisées sur WhatsApp.
      */
-    private const COUTS_LIVRAISON = [
-        'gratuite' => 0,
-        'express' => 2500,
-    ];
+    private const MODES_LIVRAISON = ['express', 'normale', 'expedition'];
 
     public function __construct(private readonly PromotionService $promotions)
     {
@@ -55,7 +55,8 @@ class CheckoutController extends Controller
             'lignes' => $lignes,
             'promo' => $promo,
             'sousTotal' => $promo['sous_total'],
-            'coutsLivraison' => self::COUTS_LIVRAISON,
+            // Communes tarifées pour la « livraison normale ».
+            'communes' => Commune::query()->actives()->orderBy('nom')->get(['id', 'nom', 'prix']),
             // Fiche adresse existante du compte (préremplissage du formulaire).
             'client' => Client::firstWhere('email', auth()->user()->email),
         ]);
@@ -71,20 +72,32 @@ class CheckoutController extends Controller
             'prenom' => ['required', 'string', 'max:100'],
             'nom' => ['required', 'string', 'max:100'],
             'telephone' => ['required', 'string', 'max:30'],
-            'adresse' => ['required', 'string', 'max:255'],
+            'commune_id' => ['required', 'exists:communes,id'],
             'ville' => ['required', 'string', 'max:100'],
             'code_postal' => ['nullable', 'string', 'max:20'],
-            'mode_livraison' => ['required', 'in:gratuite,express'],
+            'mode_livraison' => ['required', 'in:'.implode(',', self::MODES_LIVRAISON)],
             'mode_paiement' => ['required', 'in:carte,mobile_money,livraison'],
+        ], [
+            'commune_id.required' => 'Veuillez choisir votre commune.',
         ]);
 
         // Le tunnel étant protégé par le middleware auth, l'utilisateur est
         // toujours connecté : c'est lui qui identifie la commande (user_id).
         $user = $request->user();
-        $fraisLivraison = (float) self::COUTS_LIVRAISON[$donnees['mode_livraison']];
+
+        // La commune (obligatoire) sert d'adresse principale. Seule la livraison
+        // normale la facture ; express/expédition sont convenues sur WhatsApp.
+        $commune = Commune::query()->actives()->find($donnees['commune_id']);
+
+        if ($commune === null) {
+            return back()->withInput()->with('erreur', 'La commune sélectionnée n\'est plus disponible.');
+        }
+
+        $communeNom = $commune->nom;
+        $fraisLivraison = $donnees['mode_livraison'] === 'normale' ? (float) $commune->prix : 0.0;
 
         try {
-            $commande = DB::transaction(fn () => $this->creerCommande($donnees, $fraisLivraison, $user));
+            $commande = DB::transaction(fn () => $this->creerCommande($donnees, $fraisLivraison, $communeNom, $user));
         } catch (RuntimeException $e) {
             return back()->withInput()->with('erreur', $e->getMessage());
         }
@@ -93,6 +106,8 @@ class CheckoutController extends Controller
 
         $this->notifierAdmin($commande);
 
+        // Redirection vers la page de confirmation, qui ouvre WhatsApp avec le
+        // récapitulatif pré-rempli (toutes les commandes se finalisent là-bas).
         return redirect()
             ->route('checkout.confirmation', $commande)
             ->with('succes', "Votre commande {$commande->numero} a bien été enregistrée !");
@@ -129,7 +144,75 @@ class CheckoutController extends Controller
 
         $commande->load(['lignes.produit', 'client', 'codePromo']);
 
-        return view('checkout.confirmation', ['commande' => $commande]);
+        return view('checkout.confirmation', [
+            'commande' => $commande,
+            'whatsappUrl' => $this->lienWhatsapp($commande),
+        ]);
+    }
+
+    /**
+     * Lien wa.me pré-rempli vers le WhatsApp de la boutique (numéro géré en
+     * back-office). Null si aucun numéro n'est configuré.
+     */
+    private function lienWhatsapp(Commande $commande): ?string
+    {
+        $numero = ContenuAccueil::instance()->whatsapp_lien;
+
+        if (blank($numero)) {
+            return null;
+        }
+
+        return 'https://wa.me/'.$numero.'?text='.rawurlencode($this->messageWhatsapp($commande));
+    }
+
+    /**
+     * Récapitulatif texte de la commande, envoyé sur WhatsApp par le client
+     * pour finaliser (produits, montants, mode de livraison, coordonnées).
+     */
+    private function messageWhatsapp(Commande $commande): string
+    {
+        $fmt = fn ($montant) => number_format((float) $montant, 0, ',', ' ').' FCFA';
+
+        $lignes = [
+            'Bonjour NUBELLE,',
+            "Je souhaite passer la commande *{$commande->numero}*.",
+            '',
+            'Produits :',
+        ];
+
+        foreach ($commande->lignes as $ligne) {
+            $nom = $ligne->produit->nom ?? 'Produit';
+            $lignes[] = "- {$nom} x{$ligne->quantite} : ".$fmt($ligne->prix_unitaire * $ligne->quantite);
+        }
+
+        $modeLabel = Commande::MODES_LIVRAISON_LABELS[$commande->mode_livraison] ?? 'Livraison';
+        $ligneLivraison = $commande->mode_livraison === 'normale'
+            ? "{$modeLabel} - {$commande->commune} : ".$fmt($commande->frais_livraison)
+            : "{$modeLabel} (prix à convenir)";
+
+        $lignes[] = '';
+        $lignes[] = 'Sous-total : '.$fmt($commande->total_avant_remise);
+        if ((float) $commande->reduction_montant > 0) {
+            $lignes[] = 'Réduction : -'.$fmt($commande->reduction_montant);
+        }
+        $lignes[] = 'Livraison : '.$ligneLivraison;
+        $lignes[] = '*Total : '.$fmt($commande->total).'*';
+
+        $client = $commande->client;
+        $nomClient = $client ? trim("{$client->prenom} {$client->nom}") : '';
+
+        $lignes[] = '';
+        if ($nomClient !== '') {
+            $lignes[] = 'Client : '.$nomClient;
+        }
+        if ($client?->telephone) {
+            $lignes[] = 'Téléphone : '.$client->telephone;
+        }
+        if ($commande->adresse_livraison) {
+            $lignes[] = 'Adresse : '.$commande->adresse_livraison;
+        }
+
+        return implode("\n", $lignes);
     }
 
     /**
@@ -141,7 +224,7 @@ class CheckoutController extends Controller
      *
      * @param  array<string, mixed>  $donnees
      */
-    private function creerCommande(array $donnees, float $fraisLivraison, User $user): Commande
+    private function creerCommande(array $donnees, float $fraisLivraison, ?string $communeNom, User $user): Commande
     {
         $panierBrut = Panier::contenu();
 
@@ -195,7 +278,7 @@ class CheckoutController extends Controller
                 'nom' => $donnees['nom'],
                 'telephone' => $donnees['telephone'],
                 'whatsapp' => $user->whatsapp,
-                'adresse' => $donnees['adresse'],
+                'adresse' => $communeNom,
                 'ville' => $donnees['ville'],
                 'code_postal' => $donnees['code_postal'] ?? null,
             ]
@@ -213,7 +296,9 @@ class CheckoutController extends Controller
             'reduction_type' => $promo['reduction_type'],
             'remise_membre' => $promo['reduction_membre'],
             'frais_livraison' => $promo['frais_livraison'],
-            'adresse_livraison' => trim("{$donnees['adresse']}, {$donnees['ville']} ".($donnees['code_postal'] ?? '')),
+            'mode_livraison' => $donnees['mode_livraison'],
+            'commune' => $communeNom,
+            'adresse_livraison' => trim("{$communeNom}, {$donnees['ville']} ".($donnees['code_postal'] ?? '')),
             'mode_paiement' => $donnees['mode_paiement'],
         ]);
 

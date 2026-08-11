@@ -20,8 +20,23 @@
     <h1 class="mt-2 font-serif text-3xl font-bold text-gray-900 sm:text-4xl">Commande confirmée</h1>
     <p class="mt-3 text-gray-500">
       Votre commande <span class="font-semibold text-gray-800">{{ $commande->numero }}</span> a bien été enregistrée.
-      Un e-mail de confirmation sera envoyé à <span class="font-semibold text-gray-800">{{ $commande->client->email ?? '' }}</span>.
+      @if ($whatsappUrl)
+        Dernière étape : <span class="font-semibold text-gray-800">finalisez-la sur WhatsApp</span> pour confirmer la livraison et le paiement.
+      @else
+        Un e-mail de confirmation sera envoyé à <span class="font-semibold text-gray-800">{{ $commande->client->email ?? '' }}</span>.
+      @endif
     </p>
+
+    @if ($whatsappUrl)
+      <a id="lienWhatsapp" href="{{ $whatsappUrl }}" target="_blank" rel="noopener"
+         class="mt-6 inline-flex items-center gap-2.5 rounded-full bg-[#25D366] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-green-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
+        <svg viewBox="0 0 32 32" fill="currentColor" class="h-5 w-5" aria-hidden="true">
+          <path d="M16.04 3.2c-7.1 0-12.86 5.76-12.86 12.86 0 2.27.6 4.49 1.73 6.44L3.2 28.8l6.47-1.69a12.8 12.8 0 0 0 6.37 1.62h.01c7.1 0 12.86-5.76 12.86-12.86 0-3.44-1.34-6.67-3.77-9.1a12.78 12.78 0 0 0-9.1-3.77Zm7.91 15.32c-.32-.16-1.9-.94-2.2-1.05-.3-.11-.51-.16-.72.16-.21.32-.83 1.05-1.02 1.26-.19.21-.37.24-.69.08-.32-.16-1.36-.5-2.59-1.6-.96-.85-1.6-1.91-1.79-2.23-.19-.32-.02-.5.14-.65.14-.14.32-.37.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.72-1.74-.99-2.38-.26-.62-.52-.54-.72-.55l-.61-.01c-.21 0-.56.08-.85.4-.29.32-1.11 1.09-1.11 2.66 0 1.57 1.14 3.08 1.3 3.3.16.21 2.25 3.43 5.44 4.81.76.33 1.35.52 1.81.67.76.24 1.45.21 2 .13.61-.09 1.9-.78 2.17-1.53.27-.75.27-1.39.19-1.53-.08-.13-.29-.21-.61-.37Z"/>
+        </svg>
+        Finaliser sur WhatsApp
+      </a>
+      <p class="mt-2 text-xs text-gray-400">La fenêtre WhatsApp s'ouvre automatiquement. Si ce n'est pas le cas, cliquez sur le bouton.</p>
+    @endif
 
     <div class="mt-10 rounded-3xl bg-white p-6 text-left shadow-sm ring-1 ring-black/5 sm:p-8">
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-5">
@@ -66,8 +81,14 @@
           </div>
         @endif
         <div class="flex justify-between text-gray-500">
-          <span>Livraison</span>
-          <span class="text-gray-800">{{ $commande->frais_livraison > 0 ? number_format($commande->frais_livraison, 0, ',', ' ').' FCFA' : 'Gratuite' }}</span>
+          <span>Livraison <span class="text-xs text-gray-400">({{ $commande->methodeLivraison() }})</span></span>
+          <span class="text-gray-800">
+            @if ($commande->mode_livraison === 'normale')
+              {{ $commande->frais_livraison > 0 ? number_format($commande->frais_livraison, 0, ',', ' ').' FCFA' : 'Gratuite' }}
+            @else
+              À convenir sur WhatsApp
+            @endif
+          </span>
         </div>
         <div class="flex items-center justify-between border-t border-gray-100 pt-3">
           <span class="font-semibold text-gray-900">Total payé</span>
@@ -92,5 +113,20 @@
       </a>
     </div>
   </section>
+
+  @if ($whatsappUrl)
+    @push('scripts')
+    <script>
+      // Ouvre WhatsApp automatiquement avec le récapitulatif pré-rempli.
+      // On redirige l'onglet courant (une navigation n'est pas bloquée par le
+      // navigateur, contrairement à window.open déclenché sans clic). Un court
+      // délai laisse le temps de voir la confirmation de commande.
+      (function () {
+        var url = @json($whatsappUrl);
+        setTimeout(function () { window.location.href = url; }, 1500);
+      })();
+    </script>
+    @endpush
+  @endif
 
 @endsection

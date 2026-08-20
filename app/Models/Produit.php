@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Produit extends Model
 {
@@ -117,7 +118,7 @@ class Produit extends Model
         }
 
         return str_contains($chemin, '/')
-            ? route('media.show', ['path' => $chemin])
+            ? Storage::disk('public')->url($chemin)
             : asset('images/'.$chemin);
     }
 

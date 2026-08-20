@@ -6,6 +6,7 @@ use App\Support\Whatsapp;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Contenus éditables de la page d'accueil (enregistrement unique).
@@ -185,7 +186,7 @@ class ContenuAccueil extends Model
         }
 
         return str_contains($valeur, '/')
-            ? route('media.show', ['path' => $valeur])
+            ? Storage::disk('public')->url($valeur)
             : asset('images/'.$valeur);
     }
 }

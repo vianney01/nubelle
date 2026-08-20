@@ -41,14 +41,17 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            // Les fichiers du disque public sont servis par MediaController
-            // (route /media/{path}) plutôt que par le lien symbolique
-            // public/storage : ce dernier n'existe pas toujours et, sous
-            // Windows, la Junction NTFS est mal servie (403). URL volontairement
-            // RELATIVE : elle se résout sur l'hôte réel de la page (peu importe
-            // le port en dev ou le domaine en prod), donc les aperçus d'images
-            // fonctionnent aussi dans l'admin Filament, sans `storage:link`.
-            'url' => '/media',
+            // URL de base des fichiers du disque public, RELATIVE (se résout sur
+            // l'hôte réel de la page : port en dev, domaine en prod).
+            //
+            // - En dev (Windows) : /media → servi par MediaController, car
+            //   `storage:link` crée une Junction NTFS mal servie par le serveur
+            //   PHP intégré (403).
+            // - En production (Linux) : définir FILESYSTEM_PUBLIC_URL=/storage
+            //   dans le .env et lancer `php artisan storage:link`. Les images
+            //   sont alors servies EN STATIQUE par le serveur web (pas de PHP par
+            //   image → bien plus rapide, plus de 500 sur l'hébergement mutualisé).
+            'url' => env('FILESYSTEM_PUBLIC_URL', '/media'),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

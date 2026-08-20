@@ -29,8 +29,8 @@ class Categorie extends Model
     /**
      * URL utilisable de l'image de catégorie — même logique que Produit::image :
      * les fichiers uploadés depuis Filament (ex: "categories/abc.png") sont
-     * servis via MediaController, les anciens noms de démonstration (ex:
-     * "visage.jpg") depuis public/images/. Renvoie null si aucune image.
+     * servis en statique depuis public/uploads (/uploads/…), les anciens noms
+     * de démonstration (ex: "visage.jpg") depuis public/images/. Null si aucune.
      */
     protected function imageUrl(): Attribute
     {

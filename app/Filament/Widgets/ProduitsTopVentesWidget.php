@@ -47,7 +47,8 @@ class ProduitsTopVentesWidget extends TableWidget
             )
             ->paginated(false)
             ->columns([
-                ImageColumn::make('produit.image_principale')->label('')->circular(),
+                ImageColumn::make('image')->label('')->circular()
+                    ->getStateUsing(fn (LigneCommande $record) => ($u = $record->produit?->image) ? url($u) : null),
                 TextColumn::make('produit.nom')->label('Produit'),
                 TextColumn::make('total_quantite')->label('Vendus')->badge()->color('success'),
                 TextColumn::make('total_ca')->label('CA généré')->money('XOF', divideBy: 1),

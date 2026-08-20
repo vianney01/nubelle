@@ -5,7 +5,6 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CompteController;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PanierController;
 use App\Http\Controllers\ProduitController;
@@ -18,11 +17,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Fichiers uploadés (disque "public") — voir MediaController pour le pourquoi
-Route::get('/media/{path}', [MediaController::class, 'show'])
-    ->where('path', '.*')
-    ->name('media.show');
 
 // Catalogue
 Route::get('/produits', [ProduitController::class, 'index'])->name('produits.index');

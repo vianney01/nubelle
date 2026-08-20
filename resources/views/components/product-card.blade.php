@@ -2,9 +2,13 @@
 
 @php
   $p = $produit;
-  // Un vrai modèle Produit renvoie déjà une URL complète ; les données de
-  // démo renvoient un simple nom de fichier à préfixer par asset('images/…').
-  $imageUrl = str_starts_with($p['image'] ?? '', 'http') ? $p['image'] : asset('images/'.($p['image'] ?? ''));
+  // Un vrai modèle Produit renvoie déjà une URL utilisable (absolue « http… »
+  // ou relative « /uploads/… ») ; les données de démo renvoient un simple nom
+  // de fichier à préfixer par asset('images/…').
+  $imgBrut = $p['image'] ?? '';
+  $imageUrl = ($imgBrut && (str_starts_with($imgBrut, 'http') || str_starts_with($imgBrut, '/')))
+      ? $imgBrut
+      : asset('images/'.$imgBrut);
   $stock = $p['stock'] ?? 1;
   $enStock = $stock > 0;
   $note = $p['etoiles'] ?? 0;

@@ -38,7 +38,7 @@ class LignesRelationManager extends RelationManager
                     ->label('')
                     ->height(52)
                     ->square()
-                    ->getStateUsing(fn (LigneCommande $record) => $record->produit?->image),
+                    ->getStateUsing(fn (LigneCommande $record) => ($u = $record->produit?->image) ? url($u) : null),
                 TextColumn::make('produit.nom')
                     ->label('Produit')
                     ->weight('bold')

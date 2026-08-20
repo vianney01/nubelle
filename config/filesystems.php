@@ -40,18 +40,12 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
-            // URL de base des fichiers du disque public, RELATIVE (se résout sur
-            // l'hôte réel de la page : port en dev, domaine en prod).
-            //
-            // - En dev (Windows) : /media → servi par MediaController, car
-            //   `storage:link` crée une Junction NTFS mal servie par le serveur
-            //   PHP intégré (403).
-            // - En production (Linux) : définir FILESYSTEM_PUBLIC_URL=/storage
-            //   dans le .env et lancer `php artisan storage:link`. Les images
-            //   sont alors servies EN STATIQUE par le serveur web (pas de PHP par
-            //   image → bien plus rapide, plus de 500 sur l'hébergement mutualisé).
-            'url' => env('FILESYSTEM_PUBLIC_URL', '/media'),
+            // Les fichiers uploadés sont stockés DIRECTEMENT sous public/uploads,
+            // donc servis en STATIQUE par le serveur web (aucune route PHP, aucun
+            // lien symbolique). Fonctionne à l'identique en dev Windows et en prod
+            // Linux, et supporte le chargement concurrent de nombreuses images.
+            'root' => public_path('uploads'),
+            'url' => '/uploads',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

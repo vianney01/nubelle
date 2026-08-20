@@ -96,9 +96,7 @@ class Produit extends Model
      * - les anciens noms de fichiers de démonstration (ex: "produit.jpeg"),
      *   stockés directement dans public/images/ ;
      * - les fichiers réellement uploadés depuis Filament (ex: "produits/abc123.png"),
-     *   servis via MediaController plutôt que via le lien symbolique
-     *   public/storage (sur Windows, `storage:link` crée une Junction que le
-     *   serveur de développement PHP intégré sert mal — 403 Forbidden).
+     *   stockés dans public/uploads/ et servis en statique (/uploads/…).
      */
     protected function image(): Attribute
     {
@@ -107,9 +105,9 @@ class Produit extends Model
 
     /**
      * Transforme un chemin stocké en URL affichable : les fichiers uploadés
-     * depuis Filament (ex: "produits/abc.png") passent par MediaController ;
-     * les anciens noms de démonstration (ex: "produit.jpeg") pointent vers
-     * public/images/. Voir la note sur l'accessor image() ci-dessus.
+     * (ex: "produits/abc.png") sont servis en statique depuis public/uploads
+     * (/uploads/…) ; les anciens noms de démonstration (ex: "produit.jpeg")
+     * pointent vers public/images/.
      */
     protected function urlImage(?string $chemin): ?string
     {
@@ -120,6 +118,19 @@ class Produit extends Model
         return str_contains($chemin, '/')
             ? Storage::disk('public')->url($chemin)
             : asset('images/'.$chemin);
+    }
+
+    /**
+     * Vrai si le chemin désigne un fichier uploadé (contient « / ») désormais
+     * absent du disque public. Sert à ignorer une image dont le fichier a
+     * disparu ou n'a pas été déployé, plutôt que d'afficher une image cassée.
+     * (Les noms de démonstration sans « / » vivent dans public/images, versionné.)
+     */
+    protected function fichierImageManquant(?string $chemin): bool
+    {
+        return filled($chemin)
+            && str_contains($chemin, '/')
+            && ! Storage::disk('public')->exists($chemin);
     }
 
     /**
@@ -139,6 +150,9 @@ class Produit extends Model
             }
 
             foreach ((array) ($this->galerie ?? []) as $chemin) {
+                if ($this->fichierImageManquant($chemin)) {
+                    continue;
+                }
                 if ($url = $this->urlImage($chemin)) {
                     $urls[] = $url;
                 }

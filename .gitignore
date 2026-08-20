@@ -19,6 +19,12 @@
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+# /public/uploads : images uploadées depuis l'admin. On NE versionne PAS les
+# fichiers (chaque environnement — local / serveur — garde les siens) ; on
+# conserve seulement le dossier via .gitkeep. Les images du serveur restent donc
+# intactes lors des déploiements.
+/public/uploads/*
+!/public/uploads/.gitkeep
 /storage/*.key
 /storage/pail
 /vendor

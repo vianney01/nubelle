@@ -138,10 +138,23 @@ class ContenuAccueil extends Model
      */
     protected function reseauxImagesUrls(): Attribute
     {
-        return Attribute::get(fn () => array_values(array_filter(array_map(
-            fn ($chemin) => $this->urlImage($chemin),
-            (array) ($this->reseaux_images ?? [])
-        ))));
+        return Attribute::get(function () {
+            $urls = [];
+
+            foreach ((array) ($this->reseaux_images ?? []) as $chemin) {
+                // Ignore un fichier uploadé désormais absent du disque (évite une
+                // image cassée si le fichier a disparu ou n'a pas été déployé).
+                if (filled($chemin) && str_contains((string) $chemin, '/')
+                    && ! Storage::disk('public')->exists($chemin)) {
+                    continue;
+                }
+                if ($url = $this->urlImage($chemin)) {
+                    $urls[] = $url;
+                }
+            }
+
+            return array_values($urls);
+        });
     }
 
     /**
@@ -176,8 +189,8 @@ class ContenuAccueil extends Model
 
     /**
      * Résout l'URL d'une image : fichier uploadé via Filament (disque public,
-     * chemin avec « / ») servi par MediaController ; ancien nom de fichier de
-     * démonstration servi depuis public/images/. Null si aucune image.
+     * chemin avec « / ») servi en statique depuis public/uploads (/uploads/…) ;
+     * ancien nom de fichier de démonstration servi depuis public/images/.
      */
     private function urlImage(?string $valeur): ?string
     {

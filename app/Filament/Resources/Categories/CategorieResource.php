@@ -67,7 +67,9 @@ class CategorieResource extends Resource
             ->columns([
                 ImageColumn::make('image')
                     ->circular()
-                    ->getStateUsing(fn (\App\Models\Categorie $record) => $record->image_url),
+                    // URL absolue : Filament l'utilise telle quelle au lieu de la
+                    // re-résoudre via le disque (ce qui doublerait « /uploads/ »).
+                    ->getStateUsing(fn (\App\Models\Categorie $record) => $record->image_url ? url($record->image_url) : null),
                 TextColumn::make('nom')->searchable()->sortable(),
                 TextColumn::make('slug')->toggleable(),
                 TextColumn::make('produits_count')->counts('produits')->label('Produits')->badge(),

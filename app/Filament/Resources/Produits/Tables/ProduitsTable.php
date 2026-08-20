@@ -24,7 +24,9 @@ class ProduitsTable
                 ImageColumn::make('image')
                     ->label('Image')
                     ->circular()
-                    ->getStateUsing(fn (\App\Models\Produit $record) => $record->image),
+                    // URL absolue : Filament l'utilise telle quelle au lieu de la
+                    // re-résoudre via le disque (ce qui doublerait « /uploads/ »).
+                    ->getStateUsing(fn (\App\Models\Produit $record) => $record->image ? url($record->image) : null),
                 TextColumn::make('nom')->searchable()->sortable(),
                 TextColumn::make('categorie.nom')->label('Catégorie')->badge()->sortable(),
                 TextColumn::make('prix')
